@@ -3,11 +3,11 @@
 	"description": "A VueJs Gantt chart.",
 	"author": "Frederiek <frederiek@salamander.be>",
 	"license": "MIT",
-	"version": "0.1.7",
+	"version": "0.0.1",
 	"main": "./dist/vue-gantt.common.js",
 	"keywords": [
 		"vue",
-		"kanban"
+		"Gantt"
 	],
 	"scripts": {
 		"serve": "vue-cli-service serve",
