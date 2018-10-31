@@ -1,19 +1,14 @@
 <style lang="scss" scoped>
-
 </style>
 
 <template>
     <div v-on:click="editCell" :style="{ width : width + 'px'}">
-        <flat-pickr  ref="input" v-model="value" :config="config"></flat-pickr>
+        <flat-pickr ref="input" :placeholder="placeholder" v-model="value" :config="config"></flat-pickr>
     </div>
 </template>
 
 <script>
-import flatPickr from 'vue-flatpickr-component'
-import 'flatpickr/dist/flatpickr.css'
-
 export default {
-	components: { flatPickr },
 	props: {
 		/**
 		 * String value of the cell
@@ -21,7 +16,7 @@ export default {
 		 */
 		value: {
 			type: String,
-			required: true
+			required: false
 		},
 
 		/**
@@ -42,15 +37,25 @@ export default {
 		width: {
 			type: Number,
 			default: 300
+		},
+
+		/**
+		 * String to define the placeholder of the input
+		 * @default ''
+		 * @type {String}
+		 */
+		placeholder: {
+			type: String,
+			default: '01 Jan'
 		}
 	},
 	data() {
 		return {
 			edit: false,
 			config: {
-                altInputClass: 'cell',
+				altInputClass: 'cell',
 				altInput: true,
-				altFormat: 'D m',
+				altFormat: 'd M',
 				dateFormat: 'Y-m-d'
 			}
 		}

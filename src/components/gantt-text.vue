@@ -1,10 +1,9 @@
 <style lang="scss" scoped>
-
 </style>
 
 <template>
-    <div v-on:click="editCell" :style="{ width : width + 'px'}">
-        <input :class="{ editable : edit }" type="text" :value="value" @input="onUpdate($event.target.value)" v-on:blur="edit = false" ref="input" class="cell">
+    <div :style="{ width : width + 'px'}">
+        <input type="text" :value="value" @input="onUpdate($event.target.value)" v-on:blur="edit = false" ref="input" class="cell" :placeholder="placeholder">
     </div>
 </template>
 
@@ -17,7 +16,7 @@ export default {
 		 */
 		value: {
 			type: String,
-			required: true
+			required: false
 		},
 
 		/**
@@ -38,22 +37,21 @@ export default {
 		width: {
 			type: Number,
 			default: 300
-		}
-	},
-	data() {
-		return {
-			edit: false
+		},
+
+		/**
+		 * String to define the placeholder of the input
+		 * @default ''
+		 * @type {String}
+		 */
+		placeholder: {
+			type: String,
+			default: 'Add a new task...'
 		}
 	},
 	methods: {
-		onUpdate() {
+		onUpdate(value) {
 			this.$emit('input', value)
-		},
-		editCell() {
-			if (this.editable) {
-				this.edit = true
-				this.$nextTick(() => this.$refs.input.focus())
-			}
 		}
 	}
 }
