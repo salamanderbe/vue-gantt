@@ -8,5 +8,9 @@ A Configurable Gantt chart build for Vue.
 -   Customizable date fields
 -   Simple design
 
+## Demo
+
+https://salamanderbe.github.io/vue-gantt/
+
 ## Status
 In development

@@ -10,11 +10,32 @@ $markerHeight: 15px;
 	display: flex;
 
 	.gantt-actions {
+		display: flex;
 		margin: auto 0 auto auto;
 
 		.flatpickr-input {
-            padding: 6.5px;
-            margin-left: 10px;
+			padding: 6.5px;
+			margin-left: 10px;
+			width: 100px;
+			text-align: center;
+		}
+		.prev,
+		.next {
+			width: $cellHeight;
+			display: flex;
+			background: #fff;
+			font-size: 12px;
+			line-height: $cellHeight;
+			border: 1px solid #efefef;
+			margin-left: 10px;
+			cursor: pointer;
+			transition: background 0.1s;
+			&:hover {
+				background: #f4f4f4;
+			}
+			svg {
+				margin: auto;
+			}
 		}
 	}
 }
@@ -50,6 +71,7 @@ $markerHeight: 15px;
 		.table-cell {
 			line-height: 40px;
 			padding: 0 15px;
+			user-select: none;
 		}
 	}
 
@@ -123,8 +145,18 @@ $markerHeight: 15px;
         <div class="gantt-topbar">
             <div class="gantt-title" v-html="title"></div>
             <div class="gantt-actions">
+                <div class="prev" @click="prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                </div>
                 <flat-pickr ref="input" v-model="localStartDate"></flat-pickr>
                 <flat-pickr ref="input" v-model="localEndDate"></flat-pickr>
+                <div class="next" @click="next">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
             </div>
         </div>
 
@@ -213,10 +245,11 @@ $markerHeight: 15px;
 import Vue from 'vue'
 import GanttText from './gantt-text'
 import GanttDate from './gantt-date'
+import GanttNumber from './gantt-number'
 
 export default {
 	name: 'Gantt',
-	components: { GanttText, GanttDate },
+	components: { GanttText, GanttDate, GanttNumber },
 	props: {
 		/**
 		 * String that shows the gantt title
@@ -266,6 +299,14 @@ export default {
 						component: 'gantt-date',
 						width: 95,
 						placeholder: 'End'
+					},
+					duration: {
+						label: 'Days',
+						component: 'gantt-number',
+						width: 50,
+						placeholder: '0',
+						max: false,
+						min: 1
 					}
 				}
 			}
@@ -355,6 +396,22 @@ export default {
 	methods: {
 		compareDate(date, match_date) {
 			return this.$moment(date).format('Y-M-D') === this.$moment(match_date).format('Y-M-D')
+		},
+		/*
+        | Set the start date 1 day earlier
+        */
+		prev() {
+			this.localStartDate = this.$moment(this.localStartDate)
+				.subtract(1, 'd')
+				.format(this.dateFormat)
+		},
+		/*
+        | Set the start date 1 day in the future
+        */
+		next() {
+			this.localStartDate = this.$moment(this.localStartDate)
+				.add(1, 'd')
+				.format(this.dateFormat)
 		}
 	},
 	computed: {
