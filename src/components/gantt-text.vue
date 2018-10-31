@@ -52,6 +52,7 @@ export default {
 	methods: {
 		onUpdate(value) {
 			this.$emit('input', value)
+			this.$emit('update')
 		}
 	}
 }

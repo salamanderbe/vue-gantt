@@ -2,12 +2,14 @@
 $font-size: 14px;
 $spacing: 15px;
 $markerColor: #f4435a;
+$textColor: #464957;
 $cellHeight: 30px;
 $markerHeight: 15px;
 
 // Gantt tobar
 .gantt-topbar {
 	display: flex;
+	color: $textColor;
 
 	.gantt-actions {
 		display: flex;
@@ -18,6 +20,7 @@ $markerHeight: 15px;
 			margin-left: 10px;
 			width: 100px;
 			text-align: center;
+			border: 1px solid #efefef;
 		}
 		.prev,
 		.next {
@@ -45,6 +48,8 @@ $markerHeight: 15px;
 	background: #fff;
 	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 	font-size: $font-size;
+	position: relative;
+	color: $textColor;
 
 	// Header section
 	// Gantt header
@@ -97,6 +102,7 @@ $markerHeight: 15px;
 			background: #f4f4f4;
 			width: 100%;
 			flex-wrap: wrap;
+			overflow: hidden;
 		}
 
 		.table-row {
@@ -163,6 +169,9 @@ $markerHeight: 15px;
         <!-- Gant Chart -->
         <div class="gantt-chart" ref="gantt">
 
+            <!-- Gant Message -->
+            <gantt-message v-if="message.show" :type="message.type" :message="message.text" @close="message.show = false"></gantt-message>
+
             <!-- Gant Header -->
             <div class="gantt-header">
 
@@ -189,7 +198,7 @@ $markerHeight: 15px;
                     <!-- Gantt table row -->
                     <template v-for="(item, key) in items">
                         <div class="table-row" :key="key">
-                            <component v-if="fields.hasOwnProperty(field)" class="table-cell" :width="fields[field].width" :is="fields[field].component" v-model="item[field]" v-for="(field, slug) in Object.keys(item)" :key="slug"></component>
+                            <component v-if="fields.hasOwnProperty(field)" class="table-cell" :width="fields[field].width" :is="fields[field].component" v-model="item[field]" v-for="(field, slug) in Object.keys(item)" :key="slug" @update="cellUpdated(fields[field].callback, item)"></component>
                         </div>
                     </template>
 
@@ -202,7 +211,7 @@ $markerHeight: 15px;
                     <template v-for="(item, key) in items">
                         <div class="table-row" :key="key">
                             <div class="table-cell" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
-                                <div class="marker" v-if="compareDate(date, item.start_date)"></div>
+                                <div class="marker" :style="{ width: (cell_width * item.duration) + 'px' }" v-if="compareDate(date, item.start_date)"></div>
                             </div>
                         </div>
                     </template>
@@ -246,10 +255,11 @@ import Vue from 'vue'
 import GanttText from './gantt-text'
 import GanttDate from './gantt-date'
 import GanttNumber from './gantt-number'
+import GanttMessage from './gantt-message'
 
 export default {
 	name: 'Gantt',
-	components: { GanttText, GanttDate, GanttNumber },
+	components: { GanttText, GanttDate, GanttNumber, GanttMessage },
 	props: {
 		/**
 		 * String that shows the gantt title
@@ -292,21 +302,22 @@ export default {
 						label: 'Start date',
 						component: 'gantt-date',
 						width: 95,
-						placeholder: 'Start'
+						placeholder: 'Start',
+						callback: 'startdateUpdated'
 					},
 					end_date: {
 						label: 'End date',
 						component: 'gantt-date',
 						width: 95,
-						placeholder: 'End'
+						placeholder: 'End',
+						callback: 'enddateUpdated'
 					},
 					duration: {
 						label: 'Days',
 						component: 'gantt-number',
 						width: 50,
 						placeholder: '0',
-						max: false,
-						min: 1
+						callback: 'durationUpdated'
 					}
 				}
 			}
@@ -375,17 +386,31 @@ export default {
 			cell_width: 0,
 			dateFormat: 'YYYY-MM-DD HH:mm:ss',
 			localStartDate: this.startDate,
-			localEndDate: this.endDate
+			localEndDate: this.endDate,
+			requiredFields: ['start_date', 'end_date', 'duration'],
+			message: {
+				show: false,
+				type: '',
+				text: ''
+			}
 		}
 	},
 	mounted() {
-		console.log('Mount triggered')
 		// Calculate the table by
 		// sumizing the individual columns
+		let fields = []
 		Object.keys(this.fields).forEach(field_key => {
 			this.table_width += this.fields[field_key].width
+			fields.push(field_key)
 		})
 
+		// Check if all the required fields are provided
+		// provided in the gantt props
+		let valid_fields = this.requiredFields.every(field => fields.includes(field))
+		if (!valid_fields) this.handleInvalidFields()
+
+		// Set all the specific Gantt widths
+		// Gantt, Graphs, Cells
 		this.gantt_width = this.$refs.gantt.offsetWidth
 		this.graph_width = this.gantt_width - this.table_width
 		this.cell_width = this.graph_width / this.dateLimit
@@ -394,9 +419,13 @@ export default {
 		console.log('update triggered')
 	},
 	methods: {
+		/*
+        | Compare 2 given dates 
+        */
 		compareDate(date, match_date) {
 			return this.$moment(date).format('Y-M-D') === this.$moment(match_date).format('Y-M-D')
 		},
+
 		/*
         | Set the start date 1 day earlier
         */
@@ -405,6 +434,7 @@ export default {
 				.subtract(1, 'd')
 				.format(this.dateFormat)
 		},
+
 		/*
         | Set the start date 1 day in the future
         */
@@ -412,6 +442,50 @@ export default {
 			this.localStartDate = this.$moment(this.localStartDate)
 				.add(1, 'd')
 				.format(this.dateFormat)
+		},
+
+		/*
+        | Handle function when not all
+        | required fields are provided
+        */
+		handleInvalidFields() {
+			this.message.show = true
+			this.message.type = 'missing_required_fields'
+			this.message.text = ''
+		},
+
+		/*
+        | Handle function when a
+        | cell has been updated
+        */
+		cellUpdated(callback, cell) {
+			if (callback) this[callback](cell)
+
+			this.$emit('update', cell)
+		},
+
+		/*
+        | start_date updated callback
+        */
+		startdateUpdated(cell) {
+			let date_diff = this.$moment(cell.end_date, this.dateFormat).diff(this.$moment(cell.start_date, this.dateFormat), 'd')
+			if (date_diff > 0) cell.duration = date_diff
+		},
+
+		/*
+        | end_date updated callback
+        */
+		enddateUpdated(cell) {
+			let date_diff = this.$moment(cell.end_date, this.dateFormat).diff(this.$moment(cell.start_date, this.dateFormat), 'd')
+			if (date_diff > 0) cell.duration = date_diff
+		},
+
+		/*
+        | duration updated callback
+        */
+		durationUpdated(cell) {
+			let end_date = this.$moment(cell.start_date, this.dateFormat).add(cell.duration, 'd')
+			cell.end_date = end_date.format(this.dateFormat)
 		}
 	},
 	computed: {
@@ -420,7 +494,6 @@ export default {
         | Day, based on the dateLimit
         */
 		dates() {
-			console.log('dates updated')
 			let dates = []
 			for (let index = 0; index < this.dateLimit; index++) {
 				dates.push(

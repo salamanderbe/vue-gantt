@@ -31,12 +31,34 @@ $highlight-c: #f4435a;
 	background: transparent;
 	font-size: 12px;
 	cursor: pointer;
-    padding: 0 15px;
-    transition: box-shadow .3s;
+	padding: 0 15px;
+	transition: box-shadow 0.3s;
 	&:focus {
 		outline: none;
 		cursor: auto;
 		box-shadow: 0 0 0 1px $highlight-c;
 		position: relative;
 	}
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.startRange.prevMonthDay,
+.flatpickr-day.endRange.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay,
+.flatpickr-day.startRange.nextMonthDay,
+.flatpickr-day.endRange.nextMonthDay {
+	background: $highlight-c !important;
+	border-color: $highlight-c !important;
 }

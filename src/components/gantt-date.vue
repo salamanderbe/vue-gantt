@@ -2,8 +2,8 @@
 </style>
 
 <template>
-    <div v-on:click="editCell" :style="{ width : width + 'px'}">
-        <flat-pickr ref="input" :placeholder="placeholder" v-model="value" :config="config"></flat-pickr>
+    <div :style="{ width : width + 'px'}">
+        <flat-pickr ref="input" @on-change="onUpdate" :placeholder="placeholder" :value="value" :config="config"></flat-pickr>
     </div>
 </template>
 
@@ -56,19 +56,14 @@ export default {
 				altInputClass: 'cell',
 				altInput: true,
 				altFormat: 'd M',
-				dateFormat: 'Y-m-d'
+				dateFormat: 'Y-m-d H:i'
 			}
 		}
 	},
 	methods: {
-		onUpdate() {
-			this.$emit('input', value)
-		},
-		editCell() {
-			if (this.editable) {
-				this.edit = true
-				//this.$nextTick(() => this.$refs.input.focus())
-			}
+		onUpdate(selectedDates, dateStr, instance) {
+			this.$emit('input', dateStr)
+			this.$emit('update')
 		}
 	}
 }

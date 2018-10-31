@@ -3,7 +3,7 @@
 
 <template>
     <div :style="{ width : width + 'px'}">
-        <input type="number" :value="value" @input="onUpdate($event.target.value)" v-on:blur="edit = false" ref="input" class="cell" :placeholder="placeholder">
+        <input type="number" min="1" :value="value" @input="onUpdate($event.target.value)" v-on:blur="edit = false" ref="input" class="cell" :placeholder="placeholder">
     </div>
 </template>
 
@@ -51,7 +51,7 @@ export default {
 	},
 	methods: {
 		onUpdate(value) {
-			this.$emit('input', value)
+			this.$emit('input', parseInt(value))
 		}
 	}
 }
