@@ -1,9 +1,12 @@
 <style lang="scss" scoped>
+.cell.number {
+	padding-right: 0;
+}
 </style>
 
 <template>
     <div :style="{ width : width + 'px'}">
-        <input type="number" min="1" :value="value" @input="onUpdate($event.target.value)" v-on:blur="edit = false" ref="input" class="cell" :placeholder="placeholder">
+        <input type="number" :min="min" :max="max" :value="value" @input="onUpdate($event.target.value)" v-on:blur="edit = false" ref="input" class="cell number" :placeholder="placeholder">
     </div>
 </template>
 
@@ -47,6 +50,36 @@ export default {
 		placeholder: {
 			type: String,
 			default: '0'
+		},
+
+		/**
+		 * Number to define the minimum value of the number
+		 * @default '0'
+		 * @type {Number}
+		 */
+		min: {
+			type: Number,
+			default: 1
+		},
+
+		/**
+		 * Number to define the maximum value of the number
+		 * @default '100'
+		 * @type {Number}
+		 */
+		max: {
+			type: Number,
+			default: 100
+		},
+
+		/**
+		 * String to define a suffix for the input
+		 * @default '100'
+		 * @type {String}
+		 */
+		suffix: {
+			type: String,
+			default: ''
 		}
 	},
 	methods: {

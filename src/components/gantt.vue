@@ -1,4 +1,4 @@
-<style lang="scss" scoped>
+<style lang="scss">
 $font-size: 14px;
 $spacing: 15px;
 $markerColor: #f4435a;
@@ -84,6 +84,7 @@ $markerHeight: 15px;
 	// Gantt content
 	.gantt-content {
 		display: flex;
+		position: relative;
 
 		// Gantt table section
 		.gantt-table {
@@ -122,8 +123,13 @@ $markerHeight: 15px;
 					border-radius: 15px;
 					margin-top: ($cellHeight - $markerHeight) / 2;
 					cursor: pointer;
+					position: relative;
 					&:hover {
 						background: rgba($markerColor, 0.8);
+					}
+
+					&.selected {
+						pointer-events: none;
 					}
 				}
 			}
@@ -198,7 +204,7 @@ $markerHeight: 15px;
                     <!-- Gantt table row -->
                     <template v-for="(item, key) in items">
                         <div class="table-row" :key="key">
-                            <component v-if="fields.hasOwnProperty(field)" class="table-cell" :width="fields[field].width" :is="fields[field].component" v-model="item[field]" v-for="(field, slug) in Object.keys(item)" :key="slug" @update="cellUpdated(fields[field].callback, item)"></component>
+                            <component v-if="fields.hasOwnProperty(field)" class="table-cell" :width="fields[field].width" :min="fields[field].min" :max="fields[field].max" :suffix="fields[field].suffix" :is="fields[field].component" v-model="item[field]" v-for="(field, slug) in Object.keys(item)" :key="slug" @update="cellUpdated(fields[field].callback, item)"></component>
                         </div>
                     </template>
 
@@ -209,11 +215,7 @@ $markerHeight: 15px;
 
                     <!-- Gantt marker row -->
                     <template v-for="(item, key) in items">
-                        <div class="table-row" :key="key">
-                            <div class="table-cell" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
-                                <div class="marker" :style="{ width: (cell_width * item.duration) + 'px' }" v-if="compareDate(date, item.start_date)"></div>
-                            </div>
-                        </div>
+                        <gantt-chart-row :key="key" :item="item" :dates="dates" :cell_width="cell_width" @date-updated="dateUpdated"></gantt-chart-row>
                     </template>
 
                 </div>
@@ -252,14 +254,16 @@ $markerHeight: 15px;
 
 <script>
 import Vue from 'vue'
+
 import GanttText from './gantt-text'
 import GanttDate from './gantt-date'
 import GanttNumber from './gantt-number'
 import GanttMessage from './gantt-message'
+import GanttChartRow from './gantt-chart-row'
 
 export default {
 	name: 'Gantt',
-	components: { GanttText, GanttDate, GanttNumber, GanttMessage },
+	components: { GanttText, GanttDate, GanttNumber, GanttMessage, GanttChartRow },
 	props: {
 		/**
 		 * String that shows the gantt title
@@ -318,6 +322,15 @@ export default {
 						width: 50,
 						placeholder: '0',
 						callback: 'durationUpdated'
+					},
+					progress: {
+						label: '%',
+						component: 'gantt-number',
+						width: 50,
+						placeholder: '0',
+						min: 0,
+						max: 100,
+						suffix: '%'
 					}
 				}
 			}
@@ -339,7 +352,7 @@ export default {
 		 */
 		dateLimit: {
 			type: Number,
-			default: 12
+			default: 5
 		},
 
 		/**
@@ -384,7 +397,7 @@ export default {
 			table_width: 0,
 			graph_width: 0,
 			cell_width: 0,
-			dateFormat: 'YYYY-MM-DD HH:mm:ss',
+			dateFormat: 'YYYY-MM-DD HH:mm',
 			localStartDate: this.startDate,
 			localEndDate: this.endDate,
 			requiredFields: ['start_date', 'end_date', 'duration'],
@@ -419,13 +432,6 @@ export default {
 		console.log('update triggered')
 	},
 	methods: {
-		/*
-        | Compare 2 given dates 
-        */
-		compareDate(date, match_date) {
-			return this.$moment(date).format('Y-M-D') === this.$moment(match_date).format('Y-M-D')
-		},
-
 		/*
         | Set the start date 1 day earlier
         */
@@ -466,10 +472,12 @@ export default {
 
 		/*
         | start_date updated callback
+        | When updating the start_date also update end date based on duration
         */
 		startdateUpdated(cell) {
-			let date_diff = this.$moment(cell.end_date, this.dateFormat).diff(this.$moment(cell.start_date, this.dateFormat), 'd')
-			if (date_diff > 0) cell.duration = date_diff
+			cell.end_date = this.$moment(cell.start_date, this.dateFormat)
+				.add(cell.duration, 'd')
+				.format(this.dateFormat)
 		},
 
 		/*
@@ -486,6 +494,14 @@ export default {
 		durationUpdated(cell) {
 			let end_date = this.$moment(cell.start_date, this.dateFormat).add(cell.duration, 'd')
 			cell.end_date = end_date.format(this.dateFormat)
+		},
+
+		/*
+        | Handel when a new chart date has updated
+        */
+		dateUpdated(itemId, newDate) {
+			let item = this.items.find(item => item.id === parseInt(itemId))
+			item.start_date = newDate
 		}
 	},
 	computed: {
