@@ -7,7 +7,8 @@
 	height: 100%;
 	background: rgba(0, 0, 0, 0.1);
 	display: flex;
-	cursor: pointer;
+    cursor: pointer;
+    z-index: 1;
 
 	.gantt-message-message {
 		width: 300px;

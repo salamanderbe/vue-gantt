@@ -70,17 +70,18 @@ export default {
 | title  | String | '' | A title shown above the Gantt |
 | fields | Object | [fields](#fields) | A list of fields used in the header, items keys should match the header fields |
 | levels | Number | 2 | Item indentation levels |
-| dateLimit | Number | 12 | Amount of dates shown in the chart |
+| dateLimit | Number,String | auto | Amount of dates shown in the chart |
 | startDate | String | today | The start date from witch the Gantt will be shown |
 | endDate | String | today + datelimit | The end date till witch the Gantt will be shown |
-| canEdit | Boolean | true | whether or not Gantt tables can be edited
+| canEdit | Boolean | true | Whether or not Gantt tables can be edited |
+| user | Boolean, Object | { id: 'id', image: 'src' } | define the image and id field of a user object |
 
 ### Fields
 
 | key  | type | description |
 | ------------- | ------------- | ------------- |
 | label | String | The Name displayed in the header |
-| component | String | The vue component that should represent the cells (gantt-text, gantt-date, gantt-number) |
+| component | String | The vue component that should represent the cells (gantt-text, gantt-date, gantt-number, gantt-user) |
 | width | Number | The fixed cell width |
 | placeholder | String | The text shown when the cell is empty |
 
@@ -98,22 +99,46 @@ The default fields when no field option is provided.
     label: 'Start date',
     component: 'gantt-date',
     width: 95,
-    placeholder: 'Start',
-    callback: 'startdateUpdated'
+    placeholder: 'Start'
   },
   end_date: {
     label: 'End date',
     component: 'gantt-date',
     width: 95,
-    placeholder: 'End',
-    callback: 'enddateUpdated'
+    placeholder: 'End'
   },
   duration: {
     label: 'Days',
     component: 'gantt-number',
     width: 50,
-    placeholder: '0',
-    callback: 'durationUpdated'
+    placeholder: '0'
+  }
+}
+```
+
+### Users
+
+You can add user objects to the gantt by adding a gantt-user field type or by defining the user prop
+
+You can define the user id and user image key that will be used in the Gantt chart.
+The user icon will be shown in the chart section of the Gantt chart.
+
+```js
+  user: { id: id, image: 'cursom_src' }
+  items: { user: { id: 1, custom_src: './default-1.png' } }
+```
+
+Additionally you can add a user field that will be added 
+to the table portion of the Gantt chart.
+
+```js
+user: { id: id, image: 'src' }
+items: { user: { id: 1, src: './default-1.png' } }
+fields: {
+  user: {
+    label: 'Usr.',
+    component: 'gantt-user',
+    width: 35
   }
 }
 ```

@@ -4,7 +4,7 @@ $spacing: 15px;
 $markerColor: #f4435a;
 $textColor: #464957;
 $cellHeight: 30px;
-$markerHeight: 15px;
+$markerHeight: 18px;
 
 // Gantt tobar
 .gantt-topbar {
@@ -61,6 +61,15 @@ $markerHeight: 15px;
 		// Gantt table section
 		.gantt-table {
 			height: 100%;
+
+			.table-cell {
+				&.sortable {
+					cursor: pointer;
+					&:hover {
+						font-weight: 600;
+					}
+				}
+			}
 		}
 
 		// Gantt chart section
@@ -69,13 +78,21 @@ $markerHeight: 15px;
 
 			.table-cell {
 				text-align: center;
+				padding: 0;
+				.day {
+					font-size: 12px;
+					margin-right: 5px;
+				}
+				.month {
+					font-size: 10px;
+				}
 			}
 		}
 
 		// Table cell
 		.table-cell {
 			line-height: 40px;
-			padding: 0 15px;
+			padding: 0 10px;
 			user-select: none;
 		}
 	}
@@ -115,6 +132,11 @@ $markerHeight: 15px;
 			.table-cell {
 				height: 100%;
 				flex: none;
+				transition: background 0.3s;
+				display: flex;
+				&.flash {
+					background: rgba($markerColor, 0.1);
+				}
 
 				.marker {
 					height: $markerHeight;
@@ -123,7 +145,38 @@ $markerHeight: 15px;
 					border-radius: 15px;
 					margin-top: ($cellHeight - $markerHeight) / 2;
 					cursor: pointer;
-					position: relative;
+					position: absolute;
+
+					.marker-user {
+						position: absolute;
+						left: 1px;
+						top: 1px;
+						width: $markerHeight - 2px;
+						height: $markerHeight - 2px;
+						z-index: 1;
+						display: flex;
+						img {
+							width: 100%;
+							height: 100%;
+							border-radius: 50%;
+						}
+					}
+
+					.marker-progress {
+						height: 100%;
+						display: block;
+						background: rgb(255, 124, 141);
+						border-radius: 15px 0 0 15px;
+						position: absolute;
+						left: 0;
+						top: 0;
+						pointer-events: none;
+
+						&.completed {
+							border-radius: 15px;
+						}
+					}
+
 					&:hover {
 						background: rgba($markerColor, 0.8);
 					}
@@ -183,13 +236,14 @@ $markerHeight: 15px;
 
                 <!-- Gantt table section -->
                 <div class="gantt-table" :style="{ width: table_width + 'px' }">
-                    <div class="table-cell" :style="{ width: field.width + 'px' }" v-for="(field, slug) in fields" :key="slug">{{ field.label }}</div>
+                    <div class="table-cell" :class="{ sortable : !!field.sort }" :style="{ width: field.width + 'px' }" v-for="(field, slug) in fields" :key="slug" @click="sortBy = slug">{{ field.label }}</div>
                 </div>
 
                 <!-- Gantt graph section -->
                 <div class="gantt-graph" :style="{ width: graph_width + 'px' }">
                     <div class="table-cell" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
-                        {{ date | moment('D MMM') }}
+                        <span class="day">{{ date | moment('D') }}</span>
+                        <span class="month">{{ date | moment('MMM') }}</span>
                     </div>
                 </div>
 
@@ -202,23 +256,33 @@ $markerHeight: 15px;
                 <div class="gantt-table" :style="{ width: table_width + 'px' }">
 
                     <!-- Gantt table row -->
-                    <template v-for="(item, key) in items">
-                        <div class="table-row" :key="key">
-                            <component v-if="fields.hasOwnProperty(field)" class="table-cell" :width="fields[field].width" :min="fields[field].min" :max="fields[field].max" :suffix="fields[field].suffix" :is="fields[field].component" v-model="item[field]" v-for="(field, slug) in Object.keys(item)" :key="slug" @update="cellUpdated(fields[field].callback, item)"></component>
+                    <template v-for="(item, key) in localItems">
+                        <div class="table-row" :key="item.id">
+                            <template v-if="fields.hasOwnProperty(field)" v-for="(field, slug) in Object.keys(item)">
+                                <gantt-user v-if="fields[field].component === 'gantt-user'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :user="user"></gantt-user>
+                                <gantt-text v-if="fields[field].component === 'gantt-text'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" @update="cellUpdated(fields[field].callback, item)"></gantt-text>
+                                <gantt-date v-if="fields[field].component === 'gantt-date'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :minDate="item[fields[field].minDate]" @update="cellUpdated(fields[field].callback, item)"></gantt-date>
+                                <gantt-number v-if="fields[field].component === 'gantt-number'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :min="fields[field].min" :max="fields[field].max" :suffix="fields[field].suffix" @update="cellUpdated(fields[field].callback, item)"></gantt-number>
+                            </template>
                         </div>
+                        <!--                         <template v-for="i in levels - 1">
+                            <template v-for="(item, key) in item.items">
+                                <div class="table-row" :style="{ 'padding-left' : i * 15 + 'px' }" :key="item.id">
+                                    <template v-if="fields.hasOwnProperty(field)" v-for="(field, slug) in Object.keys(item)">
+                                        <gantt-user v-if="fields[field].component === 'gantt-user'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width"></gantt-user>
+                                        <gantt-text v-if="fields[field].component === 'gantt-text'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width - i * 15" @update="cellUpdated(fields[field].callback, item)"></gantt-text>
+                                        <gantt-date v-if="fields[field].component === 'gantt-date'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :minDate="item[fields[field].minDate]" @update="cellUpdated(fields[field].callback, item)"></gantt-date>
+                                        <gantt-number v-if="fields[field].component === 'gantt-number'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :min="fields[field].min" :max="fields[field].max" :suffix="fields[field].suffix" @update="cellUpdated(fields[field].callback, item)"></gantt-number>
+                                    </template>
+                                </div>
+                            </template>
+                        </template> -->
                     </template>
 
                 </div>
 
                 <!-- Gantt graph section -->
-                <div class="gantt-graph" :style="{ width: graph_width + 'px' }">
-
-                    <!-- Gantt marker row -->
-                    <template v-for="(item, key) in items">
-                        <gantt-chart-row :key="key" :item="item" :dates="dates" :cell_width="cell_width" @date-updated="dateUpdated"></gantt-chart-row>
-                    </template>
-
-                </div>
+                <gantt-graph :items="localItems" :dates="dates" :cell_width="cell_width" :graph_width="graph_width" :user="user" @date-updated="dateUpdated"></gantt-graph>
 
             </div>
 
@@ -231,7 +295,7 @@ $markerHeight: 15px;
 
                     <!-- Gantt table row -->
                     <div class="table-row">
-                        <component class="table-cell" :width="field.width" :placeholder="field.placeholder" :is="field.component" v-for="(field, slug) in fields" :key="slug"></component>
+                        <component class="table-cell" :width="field.width" :placeholder="field.placeholder" :user="user" :is="field.component" v-for="(field, slug) in fields" :key="slug"></component>
                     </div>
 
                 </div>
@@ -258,12 +322,13 @@ import Vue from 'vue'
 import GanttText from './gantt-text'
 import GanttDate from './gantt-date'
 import GanttNumber from './gantt-number'
+import GanttUser from './gantt-user'
 import GanttMessage from './gantt-message'
-import GanttChartRow from './gantt-chart-row'
+import GanttGraph from './gantt-graph'
 
 export default {
 	name: 'Gantt',
-	components: { GanttText, GanttDate, GanttNumber, GanttMessage, GanttChartRow },
+	components: { GanttText, GanttDate, GanttNumber, GanttUser, GanttMessage, GanttGraph },
 	props: {
 		/**
 		 * String that shows the gantt title
@@ -296,41 +361,25 @@ export default {
 			type: Object,
 			default: () => {
 				return {
-					summary: {
-						label: 'Summary',
-						component: 'gantt-text',
-						width: 300,
-						placeholder: 'Add a new task...'
-					},
 					start_date: {
-						label: 'Start date',
+						label: 'Start',
 						component: 'gantt-date',
-						width: 95,
+						width: 75,
 						placeholder: 'Start',
-						callback: 'startdateUpdated'
+						sort: 'date'
 					},
 					end_date: {
-						label: 'End date',
+						label: 'End',
 						component: 'gantt-date',
-						width: 95,
+						width: 75,
 						placeholder: 'End',
-						callback: 'enddateUpdated'
+						sort: 'date'
 					},
 					duration: {
 						label: 'Days',
 						component: 'gantt-number',
 						width: 50,
-						placeholder: '0',
-						callback: 'durationUpdated'
-					},
-					progress: {
-						label: '%',
-						component: 'gantt-number',
-						width: 50,
-						placeholder: '0',
-						min: 0,
-						max: 100,
-						suffix: '%'
+						placeholder: '0'
 					}
 				}
 			}
@@ -345,14 +394,15 @@ export default {
 			type: Number,
 			default: 2
 		},
+
 		/**
-		 * Number to indicate the amount of dates shown in the chart
+		 * String, Number to indicate the amount of dates shown in the chart
 		 * @default '12'
-		 * @type {Number}
+		 * @type {String, Number}
 		 */
 		dateLimit: {
-			type: Number,
-			default: 5
+			type: [String, Number],
+			default: 'auto'
 		},
 
 		/**
@@ -363,7 +413,9 @@ export default {
 		startDate: {
 			type: String,
 			default: () => {
-				return Vue.moment().format('YYYY-MM-DD HH:mm:ss')
+				return Vue.moment()
+					.subtract(2, 'd')
+					.format('YYYY-MM-DD HH:mm:ss')
 			}
 		},
 
@@ -376,7 +428,7 @@ export default {
 			type: String,
 			default: () => {
 				return Vue.moment()
-					.add(7, 'd')
+					.add(5, 'd')
 					.format('YYYY-MM-DD HH:mm:ss')
 			}
 		},
@@ -389,6 +441,22 @@ export default {
 		canEdit: {
 			type: Boolean,
 			default: true
+		},
+
+		/**
+		 * Object to reflect the user object
+		 * Or boolean to indicate no user object
+		 * @default 'true | {}'
+		 * @type {Boolean, Object}
+		 */
+		user: {
+			type: [Boolean, Object],
+			default: () => {
+				return {
+					id: 'id',
+					image: 'src'
+				}
+			}
 		}
 	},
 	data() {
@@ -400,7 +468,9 @@ export default {
 			dateFormat: 'YYYY-MM-DD HH:mm',
 			localStartDate: this.startDate,
 			localEndDate: this.endDate,
+			localDateLimit: this.dateLimit,
 			requiredFields: ['start_date', 'end_date', 'duration'],
+			sortBy: false,
 			message: {
 				show: false,
 				type: '',
@@ -409,12 +479,20 @@ export default {
 		}
 	},
 	mounted() {
+		let self = this
+
 		// Calculate the table by
 		// sumizing the individual columns
 		let fields = []
 		Object.keys(this.fields).forEach(field_key => {
 			this.table_width += this.fields[field_key].width
 			fields.push(field_key)
+
+			// Add mandatory calbacks
+			if (field_key === 'start_date') this.fields[field_key].callback = 'startdateUpdated'
+			if (field_key === 'end_date') this.fields[field_key].callback = 'enddateUpdated'
+			if (field_key === 'end_date') this.fields[field_key].minDate = 'start_date'
+			if (field_key === 'duration') this.fields[field_key].callback = 'durationUpdated'
 		})
 
 		// Check if all the required fields are provided
@@ -424,14 +502,32 @@ export default {
 
 		// Set all the specific Gantt widths
 		// Gantt, Graphs, Cells
-		this.gantt_width = this.$refs.gantt.offsetWidth
-		this.graph_width = this.gantt_width - this.table_width
-		this.cell_width = this.graph_width / this.dateLimit
-	},
-	updated() {
-		console.log('update triggered')
+		this.calculateWidths()
+		window.onresize = function(event) {
+			self.calculateWidths()
+		}
 	},
 	methods: {
+		/*
+        | Calculates the odifferent widths
+        | chart, cell, gantt
+        */
+		calculateWidths() {
+			this.gantt_width = this.$refs.gantt.offsetWidth
+			this.graph_width = this.gantt_width - this.table_width
+			if (this.dateLimit !== 'auto') this.cell_width = this.graph_width / this.localDateLimit
+			else this.calculateOptimalDateLimit()
+		},
+
+		/*
+        | Calculates the optional date limit
+        */
+		calculateOptimalDateLimit() {
+			let max_width = 50
+			this.localDateLimit = Math.floor(this.graph_width / max_width)
+			this.cell_width = this.graph_width / this.localDateLimit
+		},
+
 		/*
         | Set the start date 1 day earlier
         */
@@ -475,6 +571,12 @@ export default {
         | When updating the start_date also update end date based on duration
         */
 		startdateUpdated(cell) {
+			if (!cell.ignoreCallback) cell.ignoreCallback = {}
+			if (cell.ignoreCallback.start_date) {
+				cell.ignoreCallback.start_date = false
+				return
+			}
+
 			cell.end_date = this.$moment(cell.start_date, this.dateFormat)
 				.add(cell.duration, 'd')
 				.format(this.dateFormat)
@@ -484,16 +586,32 @@ export default {
         | end_date updated callback
         */
 		enddateUpdated(cell) {
+			if (!cell.ignoreCallback) cell.ignoreCallback = {}
+			if (cell.ignoreCallback.end_date) {
+				cell.ignoreCallback.end_date = false
+				return
+			}
+
 			let date_diff = this.$moment(cell.end_date, this.dateFormat).diff(this.$moment(cell.start_date, this.dateFormat), 'd')
 			if (date_diff > 0) cell.duration = date_diff
+
+			cell.ignoreCallback.duration = true
 		},
 
 		/*
         | duration updated callback
         */
 		durationUpdated(cell) {
-			let end_date = this.$moment(cell.start_date, this.dateFormat).add(cell.duration, 'd')
+			if (!cell.ignoreCallback) cell.ignoreCallback = {}
+			if (cell.ignoreCallback.duration) {
+				cell.ignoreCallback.duration = false
+				return
+			}
+
+			let end_date = this.$moment(cell.start_date, this.dateFormat).add(cell.duration - 1, 'd')
 			cell.end_date = end_date.format(this.dateFormat)
+
+			cell.ignoreCallback.end_date = true
 		},
 
 		/*
@@ -511,7 +629,7 @@ export default {
         */
 		dates() {
 			let dates = []
-			for (let index = 0; index < this.dateLimit; index++) {
+			for (let index = 0; index < this.localDateLimit; index++) {
 				dates.push(
 					this.$moment(this.localStartDate, this.dateFormat)
 						.add(index, 'days')
@@ -520,6 +638,28 @@ export default {
 			}
 
 			return dates
+		},
+
+		/*
+        | Generate a list of sorter 
+        | items to show in teh gantt chart
+        */
+		localItems() {
+			let items = this.items
+
+			if (this.sortBy) {
+				let self = this
+				let sort_type = this.fields[this.sortBy].sort
+				if (sort_type === 'date') {
+					items.sort(function(a, b) {
+						return new Date(a[self.sortBy]) - new Date(b[self.sortBy])
+					})
+				}
+			}
+
+			this.sortBy = false
+
+			return items
 		}
 	},
 	watch: {

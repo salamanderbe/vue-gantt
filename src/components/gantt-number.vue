@@ -85,6 +85,7 @@ export default {
 	methods: {
 		onUpdate(value) {
 			this.$emit('input', parseInt(value))
+			this.$emit('update')
 		}
 	}
 }

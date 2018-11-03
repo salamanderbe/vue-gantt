@@ -2,8 +2,8 @@
 </style>
 
 <template>
-    <div :style="{ width : width + 'px'}">
-        <flat-pickr ref="input" @on-change="onUpdate" :placeholder="placeholder" :value="value" :config="config"></flat-pickr>
+    <div :style="{ width : width + 'px'}" :class="{ flash : flash }">
+        <flat-pickr @on-change="onUpdate" :placeholder="placeholder" :value="value" :config="config"></flat-pickr>
     </div>
 </template>
 
@@ -47,16 +47,28 @@ export default {
 		placeholder: {
 			type: String,
 			default: '01 Jan'
+		},
+
+		/**
+		 * String to define the minimum date
+		 * @default ''
+		 * @type {String}
+		 */
+		minDate: {
+			type: String,
+			default: ''
 		}
 	},
 	data() {
 		return {
 			edit: false,
+			flash: false,
 			config: {
 				altInputClass: 'cell',
 				altInput: true,
 				altFormat: 'd M',
-				dateFormat: 'Y-m-d H:i'
+				dateFormat: 'Y-m-d H:i',
+				minDate: ''
 			}
 		}
 	},
@@ -64,6 +76,18 @@ export default {
 		onUpdate(selectedDates, dateStr, instance) {
 			this.$emit('input', dateStr)
 			this.$emit('update')
+		}
+	},
+	watch: {
+		minDate: function() {
+			this.config.minDate = this.minDate
+		},
+
+		value: function() {
+			this.flash = true
+			setTimeout(() => {
+				this.flash = false
+			}, 5000)
 		}
 	}
 }
