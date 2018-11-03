@@ -4,10 +4,10 @@
 <template>
     <div ref="graph" class="gantt-graph" :style="{ width: graph_width + 'px' }">
 
-        <template v-for="(item, key) in items">
+        <template v-for="(item, item_key) in items">
             <div ref="rows" class="table-row" style="position: relative;">
                 <div ref="cells" class="table-cell" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
-                    <div ref="marker" class="marker" @mousedown.left="handleMouseDown" :data-row-id="item.id" :style="{ width: (cell_width * item.duration) + 'px' }" v-if="compareDate(date, item.start_date, item)">
+                    <div ref="marker" class="marker" @mousedown.left="handleMouseDown" :data-cell-id="key + 1" :data-row-id="item.id" :style="{ width: (cell_width * item.duration) + 'px' }" v-if="compareDate(date, item.start_date, item)">
                         <div v-if="user && item.user" class="marker-user">
                             <img :src="item.user[user.image]">
                         </div>
@@ -114,6 +114,8 @@ export default {
 			e.preventDefault()
 			window.marker = e.target
 			window.marker.lastCoords = { x: e.clientX }
+			window.marker.lastCell = window.marker.dataset.cellId
+			window.marker.classList.add('selected')
 		},
 
 		/*
@@ -128,11 +130,13 @@ export default {
 			// Handle mouse up event on
 			// a marker element
 			document.documentElement.onmouseup = e => {
-				if (!window.marker) return false
 				e.preventDefault()
+				if (!window.marker) return false
+
 				let drop_date = this.dates[window.marker.lastCell - 1]
 				let row_id = window.marker.dataset.rowId
 				let item = this.items.find(item => item.id === parseInt(row_id))
+				window.marker.classList.remove('selected')
 				item.start_date = drop_date
 				window.marker = null
 			}
@@ -142,8 +146,9 @@ export default {
 			let match_cell = 0
 			let chart_offset = graph.offsetLeft
 			document.documentElement.onmousemove = e => {
-				if (!window.marker) return false
 				e.preventDefault()
+				if (!window.marker) return false
+
 				if (window.marker.lastCoords) {
 					let deltaX = e.clientX - window.marker.lastCoords.x
 					let l = +window.getComputedStyle(window.marker)['left'].slice(0, -2) || 0

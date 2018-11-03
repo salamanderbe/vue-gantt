@@ -2,7 +2,7 @@
 	"name": "@salamander.be/vue-gantt",
 	"description": "A VueJs Gantt chart.",
 	"author": "Frederiek <frederiek@salamander.be>",
-	"license": "MIT",
+	"license": "Apache",
 	"version": "0.0.2",
 	"main": "./dist/vue-gantt.common.js",
 	"keywords": [

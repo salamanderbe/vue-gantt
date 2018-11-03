@@ -147,6 +147,11 @@ $markerHeight: 18px;
 					cursor: pointer;
 					position: absolute;
 
+					.marker-user,
+					.marker-progress {
+						pointer-events: none;
+					}
+
 					.marker-user {
 						position: absolute;
 						left: 1px;
@@ -170,7 +175,6 @@ $markerHeight: 18px;
 						position: absolute;
 						left: 0;
 						top: 0;
-						pointer-events: none;
 
 						&.completed {
 							border-radius: 15px;
@@ -465,6 +469,7 @@ export default {
 			table_width: 0,
 			graph_width: 0,
 			cell_width: 0,
+			longest_cell: { width: 0, slug: '' },
 			dateFormat: 'YYYY-MM-DD HH:mm',
 			localStartDate: this.startDate,
 			localEndDate: this.endDate,
@@ -485,7 +490,8 @@ export default {
 		// sumizing the individual columns
 		let fields = []
 		Object.keys(this.fields).forEach(field_key => {
-			this.table_width += this.fields[field_key].width
+			let field_width = this.fields[field_key].width
+			this.table_width += field_width
 			fields.push(field_key)
 
 			// Add mandatory calbacks
@@ -493,6 +499,9 @@ export default {
 			if (field_key === 'end_date') this.fields[field_key].callback = 'enddateUpdated'
 			if (field_key === 'end_date') this.fields[field_key].minDate = 'start_date'
 			if (field_key === 'duration') this.fields[field_key].callback = 'durationUpdated'
+
+			// Find longest table cell
+			if (this.longest_cell.width < field_width) this.longest_cell = { width: field_width, slug: field_key }
 		})
 
 		// Check if all the required fields are provided

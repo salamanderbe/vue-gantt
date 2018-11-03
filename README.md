@@ -4,8 +4,9 @@ A Configurable Gantt chart build for Vue.
 
 ## Features & characteristics
 
--   Customizable header fields
--   Customizable date fields
+-   Customizable table fields
+-   Draggable charts
+-   Customisable user fields
 -   Simple design
 
 ## Example
