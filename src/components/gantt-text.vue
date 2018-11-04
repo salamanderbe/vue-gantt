@@ -1,9 +1,6 @@
-<style lang="scss" scoped>
-</style>
-
 <template>
     <div :style="{ width : width + 'px'}">
-        <input type="text" :value="value" @input="onUpdate($event.target.value)" v-on:blur="edit = false" ref="input" class="cell" :placeholder="placeholder">
+        <input ref="input" class="cell" type="text" :value="value" :placeholder="placeholder" @input="onUpdate($event.target.value)">
     </div>
 </template>
 

@@ -1,32 +1,17 @@
-<style>
-</style>
-
 <template>
-    <div ref="graph" class="gantt-graph" :style="{ width: graph_width + 'px' }">
+    <div ref="rows" class="graph-row" style="position: relative;">
+        <div ref="cells" class="table-cell" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
+            <div ref="marker" class="marker" v-if="compareDate(date, item.start_date, item)" :data-cell-id="key + 1" :data-row-id="item.id" :data-parent-id="item.parentId" :class="{ parent : item.isParent }" :style="{ width: (cell_width * item.duration) + 'px' }" @mousedown.left="handleMouseDown">
 
-        <template v-for="(item, item_key) in items">
-            <div ref="rows" class="table-row" style="position: relative;">
-                <div ref="cells" class="table-cell" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
-                    <div ref="marker" class="marker" @mousedown.left="handleMouseDown" :data-cell-id="key + 1" :data-row-id="item.id" :style="{ width: (cell_width * item.duration) + 'px' }" v-if="compareDate(date, item.start_date, item)">
-                        <div v-if="user && item.user" class="marker-user">
-                            <img :src="item.user[user.image]">
-                        </div>
-                        <div v-if="item.progress" class="marker-progress" :class="{ completed : item.progress > 96 }" :style="{ width: + item.progress + '%'}"></div>
-                    </div>
+                <div v-if="user && item.user && !item.isParent" class="marker-user">
+                    <img :src="item.user[user.image]">
                 </div>
+
+                <div v-if="item.progress" class="marker-progress" :class="{ completed : item.progress > 96 }" :style="{ width: + item.progress + '%'}"></div>
+
             </div>
 
-            <!--             <template v-for="(item, key) in item.items">
-                <div ref="rows" class="table-row" style="position: relative;">
-                    <div ref="cells" class="table-cell" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
-                        <div ref="marker" class="marker" @mousedown.left="handleMouseDown" :data-row-id="item.id" :style="{ width: (cell_width * item.duration) + 'px' }" v-if="compareDate(date, item.start_date, item)">
-                            <div v-if="item.progress" class="marker-progress" :class="{ completed : item.progress > 96 }" :style="{ width: + item.progress + '%'}"></div>
-                        </div>
-                    </div>
-                </div>
-            </template> -->
-
-        </template>
+        </div>
     </div>
 </template>
 
@@ -34,14 +19,14 @@
 export default {
 	props: {
 		/**
-		 * Array to define the row
-		 * @default []
-		 * @type {Array}
+		 * Object to define the row
+		 * @default {}
+		 * @type {Object}
 		 */
-		items: {
-			type: Array,
+		item: {
+			type: Object,
 			default: () => {
-				return []
+				return {}
 			}
 		},
 
@@ -68,16 +53,6 @@ export default {
 		},
 
 		/**
-		 * Number that defines the graph width
-		 * @default 0
-		 * @type {Number}
-		 */
-		graph_width: {
-			type: Number,
-			default: 0
-		},
-
-		/**
 		 * Object to reflect the user object
 		 * Or boolean to indicate no user object
 		 * @default 'true | {}'
@@ -91,13 +66,17 @@ export default {
 					image: 'src'
 				}
 			}
+		},
+
+		/**
+		 * Boolean defines if the task is opened
+		 * @default true
+		 * @type {Boolean}
+		 */
+		open: {
+			type: Boolean,
+			default: true
 		}
-	},
-	mounted() {
-		let self = this
-		this.$nextTick().then(() => {
-			self.initDragable()
-		})
 	},
 	methods: {
 		/*
@@ -112,62 +91,46 @@ export default {
         */
 		handleMouseDown(e) {
 			e.preventDefault()
-			window.marker = e.target
-			window.marker.lastCoords = { x: e.clientX }
-			window.marker.lastCell = window.marker.dataset.cellId
-			window.marker.classList.add('selected')
+			if (!this.open) {
+				let self = this
+				this.$emit('open')
+				this.$nextTick().then(() => {
+					self.handleMouseDown(e)
+				})
+			}
+
+			window.markers = []
+
+			// Create a marker object
+			// And add it to our marker list
+			let target = e.target
+			let offset = target.offsetLeft
+            let marker = this.createMarker(target, e, offset)
+            marker.recursive = false
+			window.markers.push(marker)
+
+			// Get all assicated marker childs
+			// And add them to the marker list
+			let elements = document.querySelectorAll('[data-parent-id="' + this.item.id + '"]')
+			elements.forEach(el => {
+				marker = this.createMarker(el, e, offset)
+				window.markers.push(marker)
+			})
 		},
 
 		/*
-        | Handle when a marker is dragged
+        | Create a marker element,
+        | and add it's current x position
         */
-		initDragable() {
-			if (!this.$refs.marker) return false
+		createMarker(el, e, offset) {
+			let marker = el
+			marker.lastCell = marker.dataset.cellId
+			marker.parentId = marker.dataset.parentId
+            marker.offset = marker.offsetLeft - offset
+            marker.recursive = true
+			marker.classList.add('selected')
 
-			let graph = this.$refs.graph
-			let cell_limit = this.dates.length
-
-			// Handle mouse up event on
-			// a marker element
-			document.documentElement.onmouseup = e => {
-				e.preventDefault()
-				if (!window.marker) return false
-
-				let drop_date = this.dates[window.marker.lastCell - 1]
-				let row_id = window.marker.dataset.rowId
-				let item = this.items.find(item => item.id === parseInt(row_id))
-				window.marker.classList.remove('selected')
-				item.start_date = drop_date
-				window.marker = null
-			}
-
-			// Handle mouse move event on
-			// a marker element
-			let match_cell = 0
-			let chart_offset = graph.offsetLeft
-			document.documentElement.onmousemove = e => {
-				e.preventDefault()
-				if (!window.marker) return false
-
-				if (window.marker.lastCoords) {
-					let deltaX = e.clientX - window.marker.lastCoords.x
-					let l = +window.getComputedStyle(window.marker)['left'].slice(0, -2) || 0
-
-					window.marker.lastCoords = { x: e.clientX }
-
-					for (let i = 1; i < cell_limit + 1; i++) {
-						if (Math.floor((i * this.cell_width) / (e.clientX - chart_offset)) !== 0) {
-							match_cell = i
-							break
-						}
-					}
-
-					if (window.marker.lastCell !== match_cell) {
-						window.marker.style.left = (match_cell - 1) * this.cell_width + 'px'
-						window.marker.lastCell = match_cell
-					}
-				}
-			}
+			return marker
 		}
 	}
 }

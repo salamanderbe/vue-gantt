@@ -1,12 +1,6 @@
-<style lang="scss" scoped>
-.cell.number {
-	padding-right: 0;
-}
-</style>
-
 <template>
-    <div :style="{ width : width + 'px'}">
-        <input type="number" :min="min" :max="max" :value="value" @input="onUpdate($event.target.value)" v-on:blur="edit = false" ref="input" class="cell number" :placeholder="placeholder">
+    <div :style="{ width : width + 'px'}" :class="{ disabled: !editable }">
+        <input ref="input" class="cell number" type="text" :value="localValue + suffix" :placeholder="placeholder" v-on:keydown="isNumber($event)" @keydown.up.prevent="keyUp" @keydown.down.prevent="keyDown">
     </div>
 </template>
 
@@ -74,7 +68,7 @@ export default {
 
 		/**
 		 * String to define a suffix for the input
-		 * @default '100'
+		 * @default ''
 		 * @type {String}
 		 */
 		suffix: {
@@ -82,10 +76,54 @@ export default {
 			default: ''
 		}
 	},
+	data() {
+		return {
+			localValue: this.value
+		}
+	},
 	methods: {
-		onUpdate(value) {
-			this.$emit('input', parseInt(value))
+		onUpdate() {
+			this.$emit('input', parseInt(this.localValue))
 			this.$emit('update')
+		},
+		keyUp() {
+			if (this.localValue < this.max) {
+				this.localValue++
+				this.onUpdate()
+			}
+		},
+		keyDown() {
+			if (this.localValue > this.min) {
+				this.localValue--
+				this.onUpdate()
+			}
+		},
+		isNumber(evt) {
+			evt = evt ? evt : window.event
+			var charCode = evt.which ? evt.which : evt.keyCode
+
+			if ((charCode > 95 && charCode < 106) || (charCode > 47 && charCode < 58) || charCode === 8) {
+				let potential_value = 0
+				if (charCode === 8) {
+					evt.preventDefault()
+					potential_value = this.localValue
+						.toString()
+						.replace(this.suffix, '')
+						.slice(0, -1)
+					if (parseInt(potential_value) >= this.min && parseInt(potential_value) <= this.max) {
+						this.localValue = potential_value
+						this.onUpdate()
+					} else this.localValue = this.min
+				} else {
+					let potential_value = parseInt(this.localValue.toString().replace(this.suffix, '') + evt.key)
+					if (potential_value > this.min && potential_value <= this.max) {
+						this.localValue = potential_value
+						this.onUpdate()
+					} else evt.preventDefault()
+				}
+			} else {
+				evt.preventDefault()
+			}
 		}
 	}
 }

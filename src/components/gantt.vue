@@ -1,12 +1,45 @@
 <style lang="scss">
+// Base
 $font-size: 14px;
 $spacing: 15px;
+$cellHeight: 28px;
+$markerHeight: 16px;
+
+// Colors
 $markerColor: #f4435a;
 $textColor: #464957;
-$cellHeight: 30px;
-$markerHeight: 18px;
+$parentItemColor: #1d313a;
+$childItemColor: $textColor;
 
-// Gantt tobar
+// Fonts
+$parentItemFontSize: 13px;
+$childItemFontSize: 12px;
+
+/// Slightly lighten a color
+/// @access public
+/// @param {Color} $color - color to tint
+/// @param {Number} $percentage - percentage of `$color` in returned color
+/// @return {Color}
+@function lighten($color, $percentage) {
+	@return mix(white, $color, $percentage);
+}
+
+/// Slightly darken a color
+/// @access public
+/// @param {Color} $color - color to shade
+/// @param {Number} $percentage - percentage of `$color` in returned color
+/// @return {Color}
+@function darken($color, $percentage) {
+	@return mix(black, $color, $percentage);
+}
+
+/*
+| ------------------
+| GANTT TOBAR
+| -------------------
+| Contains information about the gantt chart such as
+| the title and the date fields that are shown
+*/
 .gantt-topbar {
 	display: flex;
 	color: $textColor;
@@ -42,7 +75,14 @@ $markerHeight: 18px;
 		}
 	}
 }
-// Gantt chart
+
+/*
+| ------------------
+| GANTT CHART
+| -------------------
+| Contains the styling of the actual gantt chart
+| Gant charts will consist of a header a body and a footer
+*/
 .gantt-chart {
 	width: 100%;
 	background: #fff;
@@ -51,8 +91,13 @@ $markerHeight: 18px;
 	position: relative;
 	color: $textColor;
 
-	// Header section
-	// Gantt header
+	/*
+    | ------------------
+    | GANTT HEADER
+    | -------------------
+    | Contains the styling of the generated
+    | header fields of the Gantt chart
+    */
 	.gantt-header {
 		display: flex;
 		height: 40px;
@@ -61,6 +106,10 @@ $markerHeight: 18px;
 		// Gantt table section
 		.gantt-table {
 			height: 100%;
+			display: flex;
+			flex-wrap: wrap;
+			font-size: $font-size;
+			width: 50%;
 
 			.table-cell {
 				&.sortable {
@@ -75,6 +124,7 @@ $markerHeight: 18px;
 		// Gantt chart section
 		.gantt-graph {
 			height: 100%;
+			display: flex;
 
 			.table-cell {
 				text-align: center;
@@ -97,112 +147,208 @@ $markerHeight: 18px;
 		}
 	}
 
-	// Content section
-	// Gantt content
-	.gantt-content {
+	/*
+    | ------------------
+    | GANTT BODY
+    | -------------------
+    | Contains the styling of the generated
+    | body of the Gantt chart.
+    | This will be devided in rows and each row can have cells.
+    */
+	.gantt-body {
 		display: flex;
+		flex-wrap: wrap;
 		position: relative;
 
-		// Gantt table section
-		.gantt-table {
-			flex: none;
+		.gantt-row {
+			display: flex;
 
-			.table-cell {
-				transition: background 0.1s;
-				&:hover {
-					background: #f4f4f4;
+			.table-section {
+				display: flex;
+				height: $cellHeight;
+				line-height: $cellHeight;
+				width: 100%;
+
+				.toggle {
+					display: flex;
+					cursor: pointer;
+					&:hover {
+						background: #f4f4f4;
+					}
+					.open,
+					.close {
+						border-left: 1px solid $textColor;
+						border-bottom: 1px solid $textColor;
+						width: 5px;
+						height: 5px;
+						margin: auto;
+					}
+					.open {
+						transform: rotate(-45deg);
+					}
+					.close {
+						transform: rotate(135deg);
+					}
+				}
+
+				.table-group {
+					display: flex;
+				}
+
+				.table-cell {
+					&:hover {
+						background: #f4f4f4;
+					}
 				}
 			}
-		}
 
-		// Gantt chart section
-		.gantt-graph {
-			background: #f4f4f4;
-			width: 100%;
-			flex-wrap: wrap;
-			overflow: hidden;
-		}
+			.graph-section {
+				background: #f4f4f4;
+				overflow: hidden;
+				.graph-row {
+					display: flex;
+					position: relative;
+				}
+			}
 
-		.table-row {
-			display: flex;
-			height: $cellHeight;
-			line-height: $cellHeight;
-			width: 100%;
+			&.parent {
+				.table-cell {
+					input {
+						font-size: $parentItemFontSize;
+						color: $parentItemColor;
+						font-weight: 700;
+					}
+				}
+			}
+
+			&.child {
+				.table-group {
+					display: flex;
+					position: relative;
+					&:before {
+						content: '';
+						height: $cellHeight / 2;
+						position: absolute;
+						width: 1px;
+						background: rgba($childItemColor, 0.3);
+						left: 12px;
+						top: $cellHeight / 4;
+					}
+				}
+			}
 
 			.table-cell {
 				height: 100%;
 				flex: none;
 				transition: background 0.3s;
 				display: flex;
+				&.toggler {
+					width: 20px;
+				}
+				&.disabled {
+					pointer-events: none;
+					background: #f4f4f4;
+				}
 				&.flash {
 					background: rgba($markerColor, 0.1);
 				}
-
-				.marker {
-					height: $markerHeight;
-					width: 100%;
-					background: $markerColor;
-					border-radius: 15px;
-					margin-top: ($cellHeight - $markerHeight) / 2;
-					cursor: pointer;
-					position: absolute;
-
-					.marker-user,
-					.marker-progress {
-						pointer-events: none;
-					}
-
-					.marker-user {
-						position: absolute;
-						left: 1px;
-						top: 1px;
-						width: $markerHeight - 2px;
-						height: $markerHeight - 2px;
-						z-index: 1;
-						display: flex;
-						img {
-							width: 100%;
-							height: 100%;
-							border-radius: 50%;
-						}
-					}
-
-					.marker-progress {
-						height: 100%;
-						display: block;
-						background: rgb(255, 124, 141);
-						border-radius: 15px 0 0 15px;
-						position: absolute;
-						left: 0;
-						top: 0;
-
-						&.completed {
-							border-radius: 15px;
-						}
-					}
-
-					&:hover {
-						background: rgba($markerColor, 0.8);
-					}
-
-					&.selected {
-						pointer-events: none;
+				input {
+					font-size: $childItemFontSize;
+					color: $childItemColor;
+					&.cell.number {
+						padding-right: 0;
 					}
 				}
 			}
-		}
-	}
 
-	// Header & Content section
-	// Gantt table section
-	.gantt-table {
-		display: flex;
-		flex-wrap: wrap;
-		font-size: $font-size;
-		width: 50%;
-	}
-	.gantt-graph {
-		display: flex;
+			.marker {
+				width: 100%;
+				cursor: pointer;
+				position: absolute;
+
+				&.parent {
+					height: $markerHeight / 3;
+					margin-top: ($cellHeight - ($markerHeight / 3)) / 1.5;
+					background: darken($markerColor, 40%);
+					border-radius: 15px;
+					&:after,
+					&:before {
+						transform-origin: bottom;
+						position: absolute;
+						content: '';
+						bottom: 0;
+					}
+					&:after {
+						left: -2px;
+						transform: rotate(-50deg);
+						border-color: transparent transparent darken($markerColor, 40%) transparent;
+						border-style: solid;
+						border-width: 0px 5px 5px 5px;
+						height: 0px;
+						width: 0px;
+					}
+					&:before {
+						right: -2px;
+						transform: rotate(50deg);
+						border-color: transparent transparent darken($markerColor, 40%) transparent;
+						border-style: solid;
+						border-width: 0px 5px 5px 5px;
+						height: 0px;
+						width: 0px;
+					}
+				}
+				&:not(.parent) {
+					height: $markerHeight;
+					background: $markerColor;
+					border-radius: 15px;
+					margin-top: ($cellHeight - $markerHeight) / 2;
+					.marker-progress {
+						background: lighten($markerColor, 20%);
+					}
+
+					&:hover {
+						background: lighten($markerColor, 10%);
+					}
+				}
+
+				.marker-user,
+				.marker-progress {
+					pointer-events: none;
+				}
+
+				.marker-user {
+					position: absolute;
+					left: 1px;
+					top: 1px;
+					width: $markerHeight - 2px;
+					height: $markerHeight - 2px;
+					z-index: 1;
+					display: flex;
+					img {
+						width: 100%;
+						height: 100%;
+						border-radius: 50%;
+					}
+				}
+
+				.marker-progress {
+					height: 100%;
+					display: block;
+					border-radius: 15px 0 0 15px;
+					position: absolute;
+					left: 0;
+					top: 0;
+
+					&.completed {
+						border-radius: 15px;
+					}
+				}
+
+				&.selected {
+					pointer-events: none;
+				}
+			}
+		}
 	}
 }
 </style>
@@ -239,13 +385,13 @@ $markerHeight: 18px;
             <div class="gantt-header">
 
                 <!-- Gantt table section -->
-                <div class="gantt-table" :style="{ width: table_width + 'px' }">
-                    <div class="table-cell" :class="{ sortable : !!field.sort }" :style="{ width: field.width + 'px' }" v-for="(field, slug) in fields" :key="slug" @click="sortBy = slug">{{ field.label }}</div>
+                <div class="gantt-table" :style="{ width: widths.table + 'px' }">
+                    <div class="table-cell" :class="{ sortable : !!field.sort }" :style="{ width: field.width + 'px' }" v-for="(field, slug) in localFields" :key="slug" @click="sortBy = slug">{{ field.label }}</div>
                 </div>
 
                 <!-- Gantt graph section -->
-                <div class="gantt-graph" :style="{ width: graph_width + 'px' }">
-                    <div class="table-cell" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
+                <div class="gantt-graph" :style="{ width: widths.graph + 'px' }">
+                    <div class="table-cell" :style="{ width: widths.cell + 'px' }" v-for="(date, key) in dates" :key="key">
                         <span class="day">{{ date | moment('D') }}</span>
                         <span class="month">{{ date | moment('MMM') }}</span>
                     </div>
@@ -253,65 +399,33 @@ $markerHeight: 18px;
 
             </div>
 
-            <!-- Gant content -->
-            <div class="gantt-content">
+            <!-- Gant body -->
+            <div class="gantt-body">
 
-                <!-- Gantt table section -->
-                <div class="gantt-table" :style="{ width: table_width + 'px' }">
+                <!-- Gantt table row -->
+                <div class="gantt-row" v-for="(item, key) in localSortedItems" :class="{ parent: item.isParent, child: item.isChild }" v-if="!item.isChild || (item.isChild && openItems.includes(item.parentId))">
+                    <div class="table-section" :key="item.id" :style="{ width: widths.table + 'px'}">
 
-                    <!-- Gantt table row -->
-                    <template v-for="(item, key) in localItems">
-                        <div class="table-row" :key="item.id">
-                            <template v-if="fields.hasOwnProperty(field)" v-for="(field, slug) in Object.keys(item)">
-                                <gantt-user v-if="fields[field].component === 'gantt-user'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :user="user"></gantt-user>
-                                <gantt-text v-if="fields[field].component === 'gantt-text'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" @update="cellUpdated(fields[field].callback, item)"></gantt-text>
-                                <gantt-date v-if="fields[field].component === 'gantt-date'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :minDate="item[fields[field].minDate]" @update="cellUpdated(fields[field].callback, item)"></gantt-date>
-                                <gantt-number v-if="fields[field].component === 'gantt-number'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :min="fields[field].min" :max="fields[field].max" :suffix="fields[field].suffix" @update="cellUpdated(fields[field].callback, item)"></gantt-number>
+                        <template v-if="localFields.toggle">
+                            <div v-if="item.isParent" class="toggle" :style="{ width: localFields.toggle.width + 'px' }" @click="openItems.includes(item.id) ? openItems.splice(openItems.indexOf(item.id), 1) : openItems.push(item.id)">
+                                <span :class=" { open: openItems.includes(item.id), close: !openItems.includes(item.id) }"></span>
+                            </div>
+                            <div v-else :style="{ width: localFields.toggle.width + 'px' }"></div>
+                        </template>
+
+                        <div class="table-group">
+                            <template v-if="localFields.hasOwnProperty(field)" v-for="(field, slug) in Object.keys(item)">
+                                <gantt-user v-if="localFields[field].component === 'gantt-user'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :user="user" :editable="!item.isParent"></gantt-user>
+                                <gantt-text v-if="localFields[field].component === 'gantt-text'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" @update="cellUpdated(localFields[field].callback, item)"></gantt-text>
+                                <gantt-date v-if="localFields[field].component === 'gantt-date'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :minDate="item[localFields[field].minDate]" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-date>
+                                <gantt-number v-if="localFields[field].component === 'gantt-number'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :min="localFields[field].min" :max="localFields[field].max" :suffix="localFields[field].suffix" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-number>
                             </template>
                         </div>
-                        <!--                         <template v-for="i in levels - 1">
-                            <template v-for="(item, key) in item.items">
-                                <div class="table-row" :style="{ 'padding-left' : i * 15 + 'px' }" :key="item.id">
-                                    <template v-if="fields.hasOwnProperty(field)" v-for="(field, slug) in Object.keys(item)">
-                                        <gantt-user v-if="fields[field].component === 'gantt-user'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width"></gantt-user>
-                                        <gantt-text v-if="fields[field].component === 'gantt-text'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width - i * 15" @update="cellUpdated(fields[field].callback, item)"></gantt-text>
-                                        <gantt-date v-if="fields[field].component === 'gantt-date'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :minDate="item[fields[field].minDate]" @update="cellUpdated(fields[field].callback, item)"></gantt-date>
-                                        <gantt-number v-if="fields[field].component === 'gantt-number'" class="table-cell" v-model="item[field]" :key="slug" :width="fields[field].width" :min="fields[field].min" :max="fields[field].max" :suffix="fields[field].suffix" @update="cellUpdated(fields[field].callback, item)"></gantt-number>
-                                    </template>
-                                </div>
-                            </template>
-                        </template> -->
-                    </template>
-
-                </div>
-
-                <!-- Gantt graph section -->
-                <gantt-graph :items="localItems" :dates="dates" :cell_width="cell_width" :graph_width="graph_width" :user="user" @date-updated="dateUpdated"></gantt-graph>
-
-            </div>
-
-            <!-- Gant content -->
-            <!-- intended for adding new rows -->
-            <div v-if="canEdit" class="gantt-content new">
-
-                <!-- Gantt table section -->
-                <div class="gantt-table" :style="{ width: table_width + 'px' }">
-
-                    <!-- Gantt table row -->
-                    <div class="table-row">
-                        <component class="table-cell" :width="field.width" :placeholder="field.placeholder" :user="user" :is="field.component" v-for="(field, slug) in fields" :key="slug"></component>
-                    </div>
-
-                </div>
-
-                <!-- Gantt graph section -->
-                <div class="gantt-graph" :style="{ width: graph_width + 'px' }">
-
-                    <!-- Gantt table row -->
-                    <div class="table-row">
 
                     </div>
-
+                    <div class="graph-section" :style="{ width: widths.graph + 'px' }">
+                        <gantt-graph :item="item" :dates="dates" :cell_width="widths.cell" :user="user" :open="!item.isParent || openItems.includes(item.id)" @date-updated="dateUpdated" @open="openItems.push(item.id)"></gantt-graph>
+                    </div>
                 </div>
 
             </div>
@@ -368,14 +482,14 @@ export default {
 					start_date: {
 						label: 'Start',
 						component: 'gantt-date',
-						width: 75,
+						width: 70,
 						placeholder: 'Start',
 						sort: 'date'
 					},
 					end_date: {
 						label: 'End',
 						component: 'gantt-date',
-						width: 75,
+						width: 70,
 						placeholder: 'End',
 						sort: 'date'
 					},
@@ -397,6 +511,16 @@ export default {
 		levels: {
 			type: Number,
 			default: 2
+		},
+
+		/**
+		 * String to indicate the key of nested items
+		 * @default '2'
+		 * @type {String}
+		 */
+		levelKey: {
+			type: String,
+			default: 'items'
 		},
 
 		/**
@@ -465,12 +589,17 @@ export default {
 	},
 	data() {
 		return {
-			gantt_width: 0,
-			table_width: 0,
-			graph_width: 0,
-			cell_width: 0,
+			widths: {
+				gantt: 0,
+				table: 0,
+				graphh: 0,
+				cell: 0
+			},
+			indent: 20,
 			longest_cell: { width: 0, slug: '' },
 			dateFormat: 'YYYY-MM-DD HH:mm',
+			localItems: this.compileItems(this.items),
+			localFields: this.fields,
 			localStartDate: this.startDate,
 			localEndDate: this.endDate,
 			localDateLimit: this.dateLimit,
@@ -480,25 +609,27 @@ export default {
 				show: false,
 				type: '',
 				text: ''
-			}
+			},
+			openItems: []
 		}
 	},
 	mounted() {
 		let self = this
 
+		this.localFields = { toggle: { label: '', width: 20 }, ...this.fields }
 		// Calculate the table by
 		// sumizing the individual columns
 		let fields = []
-		Object.keys(this.fields).forEach(field_key => {
-			let field_width = this.fields[field_key].width
-			this.table_width += field_width
+		Object.keys(this.localFields).forEach(field_key => {
+			let field_width = this.localFields[field_key].width
+			this.widths.table += field_width
 			fields.push(field_key)
 
 			// Add mandatory calbacks
-			if (field_key === 'start_date') this.fields[field_key].callback = 'startdateUpdated'
-			if (field_key === 'end_date') this.fields[field_key].callback = 'enddateUpdated'
-			if (field_key === 'end_date') this.fields[field_key].minDate = 'start_date'
-			if (field_key === 'duration') this.fields[field_key].callback = 'durationUpdated'
+			if (field_key === 'start_date') this.localFields[field_key].callback = 'startdateUpdated'
+			if (field_key === 'end_date') this.localFields[field_key].callback = 'enddateUpdated'
+			if (field_key === 'end_date') this.localFields[field_key].minDate = 'start_date'
+			if (field_key === 'duration') this.localFields[field_key].callback = 'durationUpdated'
 
 			// Find longest table cell
 			if (this.longest_cell.width < field_width) this.longest_cell = { width: field_width, slug: field_key }
@@ -515,16 +646,56 @@ export default {
 		window.onresize = function(event) {
 			self.calculateWidths()
 		}
+
+		// Init draggable markers
+		this.$nextTick().then(() => {
+			self.initDragable()
+		})
 	},
 	methods: {
+		/*
+        | Compile the list of items
+        | This will flatten the multidimentional array
+        | to a more feasable array.
+        */
+		compileItems(items) {
+			console.log('compile local items')
+			let result = []
+			// Loop over all the given items
+			items.forEach(item => {
+				// Check if the item has a key
+				// that indicitats if it has children
+				let has_level = item.hasOwnProperty(this.levelKey)
+
+				// If we have children
+				// Mark the item as a parent item
+				if (has_level && item[this.levelKey].length > 0) {
+					item.isParent = true
+					let k = result.push(item)
+					let children = item[this.levelKey].forEach(child => {
+						child.isChild = true
+						child.isParent = false
+						child.parentId = item.id
+						result.push(child)
+					})
+					delete result[k][this.levelKey]
+				} else {
+					item.isParent = false
+					result.push(item)
+				}
+			})
+
+			return result
+		},
+
 		/*
         | Calculates the odifferent widths
         | chart, cell, gantt
         */
 		calculateWidths() {
-			this.gantt_width = this.$refs.gantt.offsetWidth
-			this.graph_width = this.gantt_width - this.table_width
-			if (this.dateLimit !== 'auto') this.cell_width = this.graph_width / this.localDateLimit
+			this.widths.gantt = this.$refs.gantt.offsetWidth
+			this.widths.graph = this.widths.gantt - this.widths.table
+			if (this.dateLimit !== 'auto') this.widths.cell = this.widths.graph / this.localDateLimit
 			else this.calculateOptimalDateLimit()
 		},
 
@@ -532,9 +703,8 @@ export default {
         | Calculates the optional date limit
         */
 		calculateOptimalDateLimit() {
-			let max_width = 50
-			this.localDateLimit = Math.floor(this.graph_width / max_width)
-			this.cell_width = this.graph_width / this.localDateLimit
+			this.localDateLimit = Math.floor(this.widths.graph / 50)
+			this.widths.cell = this.widths.graph / this.localDateLimit
 		},
 
 		/*
@@ -584,11 +754,41 @@ export default {
 			if (cell.ignoreCallback.start_date) {
 				cell.ignoreCallback.start_date = false
 				return
-			}
+            }
+            console.log('-- callback: start_date updated')
 
 			cell.end_date = this.$moment(cell.start_date, this.dateFormat)
 				.add(cell.duration, 'd')
-				.format(this.dateFormat)
+                .format(this.dateFormat)
+
+			if (cell.isChild && !cell.recursive) {
+				// Get the parent item of the child
+				let parent_item = this.localItems.find(item => item.id === parseInt(cell.parentId))
+				// Get all the parents children
+				let children = this.localItems.filter(item => item.parentId === parseInt(cell.parentId))
+				let start_date = children[0].start_date
+                let end_date = children[0].end_date
+                
+                // Calculate first and last date
+                children.forEach(child => {
+					start_date = new Date(child.start_date) < new Date(start_date) ? child.start_date : start_date
+					end_date = new Date(child.end_date) > new Date(end_date) ? child.end_date : end_date
+                })
+                let duration = this.$moment(end_date, this.dateFormat).diff(this.$moment(start_date, this.dateFormat), 'd')
+
+                // Ignore the default callback
+                // We want to set the properties bottom up 
+                // not top down
+                if (!parent_item.ignoreCallback) parent_item.ignoreCallback = {}
+				parent_item.ignoreCallback.start_date = true
+				parent_item.ignoreCallback.end_date = true
+                parent_item.ignoreCallback.duration = true
+                
+                // Set the properties
+                parent_item.start_date = start_date
+                parent_item.end_date = end_date
+                parent_item.duration = duration
+            }
 		},
 
 		/*
@@ -599,7 +799,8 @@ export default {
 			if (cell.ignoreCallback.end_date) {
 				cell.ignoreCallback.end_date = false
 				return
-			}
+            }
+            console.log('-- callback: end_date updated')
 
 			let date_diff = this.$moment(cell.end_date, this.dateFormat).diff(this.$moment(cell.start_date, this.dateFormat), 'd')
 			if (date_diff > 0) cell.duration = date_diff
@@ -615,20 +816,96 @@ export default {
 			if (cell.ignoreCallback.duration) {
 				cell.ignoreCallback.duration = false
 				return
-			}
+            }
+            console.log('-- callback: duration updated')
 
 			let end_date = this.$moment(cell.start_date, this.dateFormat).add(cell.duration - 1, 'd')
 			cell.end_date = end_date.format(this.dateFormat)
+            
+			if (cell.isChild) { 
+                 console.log('child is updated')
+				// Get the parent item of the child
+				let parent_item = this.localItems.find(item => item.id === parseInt(cell.parentId))
+				// Get all the parents children
+				let children = this.localItems.filter(item => item.parentId === parseInt(cell.parentId))
+				let start_date = cell.start_date
+                let end_date = cell.end_date
+                
+                // Calculate first and last date
+                children.forEach(child => {
+					start_date = new Date(child.start_date) < new Date(start_date) ? child.start_date : start_date
+					end_date = new Date(child.end_date) > new Date(end_date) ? child.end_date : end_date
+                })
+                let duration = this.$moment(end_date, this.dateFormat).diff(this.$moment(start_date, this.dateFormat), 'd') + 1
 
-			cell.ignoreCallback.end_date = true
+                if (!parent_item.ignoreCallback) parent_item.ignoreCallback = {}
+                parent_item.ignoreCallback.end_date = true
+
+                // Set the properties
+                parent_item.duration = duration
+                parent_item.end_date = end_date
+            }
+
+             cell.ignoreCallback.end_date = true
 		},
 
 		/*
-        | Handel when a new chart date has updated
+        | Handle when a new chart date has updated
         */
 		dateUpdated(itemId, newDate) {
-			let item = this.items.find(item => item.id === parseInt(itemId))
+			let item = this.localItems.find(item => item.id === parseInt(itemId))
 			item.start_date = newDate
+		},
+
+		/*
+        | Handle when a marker is dragged
+        */
+		initDragable() {
+			let graph = document.querySelector('.graph-section')
+			let cell_limit = this.dates.length
+
+			// Handle mouse up event on
+			// a marker element
+			document.documentElement.onmouseup = e => {
+				e.preventDefault()
+				if (!window.markers || window.markers.length === 0) return false
+
+				window.markers.forEach(marker => {
+					let drop_date = this.dates[marker.lastCell - 1]
+					let row_id = marker.dataset.rowId
+					let item = this.localItems.find(item => item.id === parseInt(row_id))
+					item.recursive = marker.recursive
+
+					marker.classList.remove('selected')
+					if (item) item.start_date = drop_date
+				})
+				window.markers = []
+			}
+
+			// Handle mouse move event on
+			// a marker element
+			let match_cell = 0
+			let chart_offset = graph.offsetLeft
+			document.documentElement.onmousemove = e => {
+				e.preventDefault()
+				if (!window.markers || window.markers.length === 0) return false
+
+				window.markers.forEach(marker => {
+					let l = +window.getComputedStyle(marker)['left'].slice(0, -2) || 0
+
+					for (let i = 1; i < cell_limit + 1; i++) {
+						if (Math.floor((i * this.widths.cell) / (e.clientX + marker.offset - chart_offset)) !== 0) {
+							match_cell = i
+							break
+						}
+					}
+
+					if (marker.lastCell !== match_cell) {
+						marker.style.left = (match_cell - 1) * this.widths.cell + 'px'
+						marker.lastCell = match_cell
+					}
+				})
+			}
 		}
 	},
 	computed: {
@@ -650,15 +927,15 @@ export default {
 		},
 
 		/*
-        | Generate a list of sorter 
+        | Generate a list of sorted
         | items to show in teh gantt chart
         */
-		localItems() {
-			let items = this.items
+		localSortedItems() {
+			let items = this.localItems
 
 			if (this.sortBy) {
 				let self = this
-				let sort_type = this.fields[this.sortBy].sort
+				let sort_type = this.localFields[this.sortBy].sort
 				if (sort_type === 'date') {
 					items.sort(function(a, b) {
 						return new Date(a[self.sortBy]) - new Date(b[self.sortBy])

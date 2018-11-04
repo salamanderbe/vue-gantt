@@ -45,7 +45,7 @@ export default {
 				progress: {
 					label: '%',
 					component: 'gantt-number',
-					width: 50,
+					width: 45,
 					placeholder: '0',
 					min: 0,
 					max: 100,
@@ -53,7 +53,7 @@ export default {
 				}
 			},
 			items: [
-                { id: 1, user: { id: 1, src: './default-1.png' }, summary: 'This is a task.', start_date: '2018-11-02 00:00', end_date: '2018-11-03 00:00', duration: 2, progress: 50, 
+                { id: 1, user: { id: 1, src: './default-1.png' }, summary: 'This is a parent task.', start_date: '2018-11-02 00:00', end_date: '2018-11-03 00:00', duration: 2, progress: 50, 
                     items: [
 						{ id: 9, user: { id: 1, src: './default-1.png' }, summary: 'This is a subtask.', start_date: '2018-11-02 00:00', end_date: '2018-11-02 00:00', duration: 1, progress: 100 },
 						{ id: 10, user: { id: 1, src: './default-1.png' }, summary: 'A subtask falls under a parent task.', start_date: '2018-11-03 00:00', end_date: '2018-11-03 00:00', duration: 1, progress: 0 }
@@ -61,7 +61,13 @@ export default {
 				},
 				{ id: 2, user: { id: 1, src: './default-1.png' }, summary: 'This is a task with a longer description.', start_date: '2018-11-03 00:00', end_date: '2018-11-04 00:00', duration: 2, progress: 20 },
 				{ id: 3, user: { id: 1, src: './default-1.png' }, summary: 'You should first complete the first task.', start_date: '2018-11-04 00:00', end_date: '2018-11-12 00:00', duration: 8, progress: 10 },
-				{ id: 4, user: { id: 2, src: './default-2.png' }, summary: 'And then, you should complete the second task.', start_date: '2018-11-07 00:00', end_date: '2018-11-10 00:00', duration: 3, progress: 0 },
+                { id: 4, user: { id: 2, src: './default-2.png' }, summary: 'This is also a parent task.', start_date: '2018-11-07 00:00', end_date: '2018-11-10 00:00', duration: 3, progress: 0,
+                    items: [
+						{ id: 11, user: { id: 1, src: './default-1.png' }, summary: 'This is a subtask.', start_date: '2018-11-07 00:00', end_date: '2018-11-07 00:00', duration: 1, progress: 100 },
+						{ id: 12, user: { id: 3, src: './default-3.png' }, summary: 'A subtask falls under a parent task.', start_date: '2018-11-08 00:00', end_date: '2018-11-09 00:00', duration: 2, progress: 0 },
+						{ id: 13, user: { id: 3, src: './default-3.png' }, summary: 'infact all subtasks have a parent task.', start_date: '2018-11-09 00:00', end_date: '2018-11-10 00:00', duration: 1, progress: 0 }
+                    ]
+                },
 				{ id: 5, user: { id: 2, src: './default-2.png' }, summary: 'Do not start with the last task.', start_date: '2018-11-09 00:00', end_date: '2018-11-15 00:00', duration: 7, progress: 0 },
 				{ id: 6, user: { id: 1, src: './default-1.png' }, summary: 'It will make your project manager mad.', start_date: '2018-11-15 00:00', end_date: '2018-11-17 00:00', duration: 3, progress: 0 },
 				{ id: 7, user: { id: 3, src: './default-3.png' }, summary: 'Very very... mad.', start_date: '2018-11-17 00:00', end_date: '2018-11-19 00:00', duration: 3, progress: 0 },

@@ -1,8 +1,5 @@
-<style lang="scss" scoped>
-</style>
-
 <template>
-    <div :style="{ width : width + 'px'}" :class="{ flash : flash }">
+    <div :style="{ width : width + 'px'}" :class="{ flash : flash, disabled: !editable }">
         <flat-pickr @on-change="onUpdate" :placeholder="placeholder" :value="value" :config="config"></flat-pickr>
     </div>
 </template>
@@ -57,7 +54,7 @@ export default {
 		minDate: {
 			type: String,
 			default: ''
-		}
+        }
 	},
 	data() {
 		return {
@@ -80,7 +77,7 @@ export default {
 	},
 	watch: {
 		minDate: function() {
-			this.config.minDate = this.minDate
+			// this.config.minDate = this.minDate // TODO fix
 		},
 
 		value: function() {
