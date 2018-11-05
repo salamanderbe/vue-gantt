@@ -1,7 +1,7 @@
 <template>
     <div ref="rows" class="graph-row" style="position: relative;">
-        <div ref="cells" class="table-cell" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
-            <div ref="marker" class="marker" v-if="compareDate(date, item.start_date, item)" :data-cell-id="key + 1" :data-row-id="item.id" :data-parent-id="item.parentId" :class="{ parent : item.isParent }" :style="{ width: (cell_width * item.duration) + 'px' }" @mousedown.left="handleMouseDown">
+        <div ref="cells" class="table-cell" :class="{ weekend: isWeekend(date.date), 'hidden-date' : !date.shown }" :style="{ width: cell_width + 'px' }" v-for="(date, key) in dates" :key="key">
+            <div ref="marker" class="marker" v-if="compareDate(date.date, item.start_date, item)" :data-cell-id="key + 1" :data-row-id="item.id" :data-parent-id="item.parentId" :class="{ parent : item.isParent }" :style="{ width: (cell_width * item.duration) + 'px' }" @mousedown.left="handleMouseDown">
 
                 <div v-if="user && item.user && !item.isParent" class="marker-user">
                     <img :src="item.user[user.image]">
@@ -87,6 +87,14 @@ export default {
 		},
 
 		/*
+        | Compare 2 given dates 
+        */
+		isWeekend(date) {
+            let day = new Date(date).getDay()
+			return day === 6 || day === 0
+		},
+
+		/*
         | Handle when a marker has been clicked
         */
 		handleMouseDown(e) {
@@ -105,8 +113,8 @@ export default {
 			// And add it to our marker list
 			let target = e.target
 			let offset = target.offsetLeft
-            let marker = this.createMarker(target, e, offset)
-            marker.recursive = false
+			let marker = this.createMarker(target, e, offset)
+			marker.recursive = false
 			window.markers.push(marker)
 
 			// Get all assicated marker childs
@@ -126,8 +134,8 @@ export default {
 			let marker = el
 			marker.lastCell = marker.dataset.cellId
 			marker.parentId = marker.dataset.parentId
-            marker.offset = marker.offsetLeft - offset
-            marker.recursive = true
+			marker.offset = marker.offsetLeft - offset
+			marker.recursive = true
 			marker.classList.add('selected')
 
 			return marker

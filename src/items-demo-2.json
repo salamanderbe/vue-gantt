@@ -1,0 +1,259 @@
+[
+	{
+		"id": 1,
+		"summary": "Port of Antwerp",
+		"start_date": "2018-9-24 00:00",
+		"end_date": "2018-10-05 00:00",
+		"duration": 10,
+		"progress": 100,
+		"items": [
+			{
+				"id": 2,
+				"user": { "id": 3, "src": "./default-3.png" },
+				"summary": "Design",
+				"start_date": "2018-9-24 00:00",
+				"end_date": "2018-9-24 00:00",
+				"duration": 1,
+				"progress": 100
+			},
+			{
+				"id": 3,
+				"user": { "id": 2, "src": "./default-2.png" },
+				"summary": "Development - infrastructure",
+				"start_date": "2018-9-24 00:00",
+				"end_date": "2018-9-24 00:00",
+				"duration": 1,
+				"progress": 100
+			},
+			{
+				"id": 4,
+				"user": { "id": 1, "src": "./default-1.png" },
+				"summary": "Development - Coding",
+				"start_date": "2018-9-25 00:00",
+				"end_date": "2018-10-05 00:00",
+				"duration": 9,
+				"progress": 100
+			}
+		]
+	},
+	{
+		"id": 5,
+		"summary": "Studio CD",
+		"start_date": "2018-9-06 00:00",
+		"end_date": "2018-10-04 00:00",
+		"duration": 21,
+		"progress": 92,
+		"items": [
+			{
+				"id": 6,
+				"user": { "id": 3, "src": "./default-3.png" },
+				"summary": "Design",
+				"start_date": "2018-9-06 00:00",
+				"end_date": "2018-9-10 00:00",
+				"duration": 5,
+				"progress": 100
+			},
+			{
+				"id": 7,
+				"user": { "id": 2, "src": "./default-2.png" },
+				"summary": "Development - infrastructure",
+				"start_date": "2018-9-12 00:00",
+				"end_date": "2018-9-13 00:00",
+				"duration": 2,
+				"progress": 100
+			},
+			{
+				"id": 8,
+				"user": { "id": 1, "src": "./default-1.png" },
+				"summary": "Development - Coding",
+				"start_date": "2018-9-14 00:00",
+				"end_date": "2018-10-19 00:00",
+				"duration": 4,
+				"progress": 100
+			},
+			{
+				"id": 9,
+				"user": { "id": 3, "src": "./default-3.png" },
+				"summary": "QA - design",
+				"start_date": "2018-9-20 00:00",
+				"end_date": "2018-10-20 00:00",
+				"duration": 1,
+				"progress": 100
+			},
+			{
+				"id": 10,
+				"user": { "id": 2, "src": "./default-2.png" },
+				"summary": "QA - development",
+				"start_date": "2018-10-04 00:00",
+				"end_date": "2018-10-01 00:00",
+				"duration": 1,
+				"progress": 0
+			}
+		]
+	},
+	{
+		"id": 11,
+		"summary": "Q-light",
+		"start_date": "2018-9-05 00:00",
+		"end_date": "2018-10-03 00:00",
+		"duration": 21,
+		"progress": 95,
+		"items": [
+			{
+				"id": 14,
+				"user": { "id": 3, "src": "./default-3.png" },
+				"summary": "Design",
+				"start_date": "2018-9-05 00:00",
+				"end_date": "2018-9-10 00:00",
+				"duration": 5,
+				"progress": 100
+			},
+			{
+				"id": 15,
+				"user": { "id": 2, "src": "./default-2.png" },
+				"summary": "Development - infrastructure",
+				"start_date": "2018-9-11 00:00",
+				"end_date": "2018-9-11 00:00",
+				"duration": 1,
+				"progress": 100
+			},
+			{
+				"id": 16,
+				"user": { "id": 1, "src": "./default-1.png" },
+				"summary": "Development - Coding",
+				"start_date": "2018-9-12 00:00",
+				"end_date": "2018-10-20 00:00",
+				"duration": 7,
+				"progress": 100
+			},
+			{
+				"id": 17,
+				"user": { "id": 3, "src": "./default-3.png" },
+				"summary": "QA - design",
+				"start_date": "2018-9-26 00:00",
+				"end_date": "2018-10-26 00:00",
+				"duration": 1,
+				"progress": 100
+			},
+			{
+				"id": 18,
+				"user": { "id": 2, "src": "./default-2.png" },
+				"summary": "QA - development",
+				"start_date": "2018-10-03 00:00",
+				"end_date": "2018-10-03 00:00",
+				"duration": 1,
+				"progress": 0
+			}
+		]
+	},
+	{
+		"id": 12,
+		"summary": "Prime impressions",
+		"start_date": "2018-9-18 00:00",
+		"end_date": "2018-10-16 00:00",
+		"duration": 21,
+		"progress": 80,
+		"items": [
+			{
+				"id": 19,
+				"user": { "id": 3, "src": "./default-3.png" },
+				"summary": "Design",
+				"start_date": "2018-9-18 00:00",
+				"end_date": "2018-9-20 00:00",
+				"duration": 3,
+				"progress": 100
+			},
+			{
+				"id": 20,
+				"user": { "id": 2, "src": "./default-2.png" },
+				"summary": "Development - infrastructure",
+				"start_date": "2018-10-02 00:00",
+				"end_date": "2018-10-02 00:00",
+				"duration": 1,
+				"progress": 100
+			},
+			{
+				"id": 21,
+				"user": { "id": 1, "src": "./default-1.png" },
+				"summary": "Development - Coding",
+				"start_date": "2018-9-18 00:00",
+				"end_date": "2018-10-20 00:00",
+				"duration": 7,
+				"progress": 100
+			},
+			{
+				"id": 22,
+				"user": { "id": 3, "src": "./default-3.png" },
+				"summary": "QA - design",
+				"start_date": "2018-10-12 00:00",
+				"end_date": "2018-10-12 00:00",
+				"duration": 1,
+				"progress": 100
+			},
+			{
+				"id": 23,
+				"user": { "id": 2, "src": "./default-2.png" },
+				"summary": "QA - development",
+				"start_date": "2018-10-15 00:00",
+				"end_date": "2018-10-16 00:00",
+				"duration": 1,
+				"progress": 0
+			}
+		]
+	},
+	{
+		"id": 13,
+		"summary": "APK Group",
+		"start_date": "2018-9-18 00:00",
+		"end_date": "2018-10-25 00:00",
+		"duration": 28,
+		"progress": 65,
+		"items": [
+			{
+				"id": 24,
+				"user": { "id": 3, "src": "./default-3.png" },
+				"summary": "Design",
+				"start_date": "2018-9-18 00:00",
+				"end_date": "2018-9-20 00:00",
+				"duration": 3,
+				"progress": 100
+			},
+			{
+				"id": 25,
+				"user": { "id": 2, "src": "./default-2.png" },
+				"summary": "Development - infrastructure",
+				"start_date": "2018-10-08 00:00",
+				"end_date": "2018-10-11 00:00",
+				"duration": 4,
+				"progress": 100
+			},
+			{
+				"id": 26,
+				"user": { "id": 1, "src": "./default-1.png" },
+				"summary": "Development - Coding",
+				"start_date": "2018-10-08 00:00",
+				"end_date": "2018-10-22 00:00",
+				"duration": 15,
+				"progress": 100
+			},
+			{
+				"id": 27,
+				"user": { "id": 3, "src": "./default-3.png" },
+				"summary": "QA - design",
+				"start_date": "2018-10-18 00:00",
+				"end_date": "2018-10-18 00:00",
+				"duration": 1,
+				"progress": 100
+			},
+			{
+				"id": 28,
+				"user": { "id": 2, "src": "./default-2.png" },
+				"summary": "QA - development",
+				"start_date": "2018-10-25 00:00",
+				"end_date": "2018-10-26 00:00",
+				"duration": 2,
+				"progress": 0
+			}
+		]
+	}
+]

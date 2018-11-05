@@ -104,12 +104,14 @@ $childItemFontSize: 12px;
 		border-bottom: 1px solid #f4f4f4;
 
 		// Gantt table section
-		.gantt-table {
+		.table-section {
 			height: 100%;
 			display: flex;
 			flex-wrap: wrap;
 			font-size: $font-size;
 			width: 50%;
+			background: #fff;
+			z-index: 0;
 
 			.table-cell {
 				&.sortable {
@@ -122,7 +124,7 @@ $childItemFontSize: 12px;
 		}
 
 		// Gantt chart section
-		.gantt-graph {
+		.graph-section {
 			height: 100%;
 			display: flex;
 
@@ -144,6 +146,9 @@ $childItemFontSize: 12px;
 			line-height: 40px;
 			padding: 0 10px;
 			user-select: none;
+			&.hidden-date {
+				content: '';
+			}
 		}
 	}
 
@@ -208,6 +213,7 @@ $childItemFontSize: 12px;
 				.graph-row {
 					display: flex;
 					position: relative;
+					height: 100%;
 				}
 			}
 
@@ -242,6 +248,9 @@ $childItemFontSize: 12px;
 				flex: none;
 				transition: background 0.3s;
 				display: flex;
+				&.weekend {
+					background: #e8e8e8;
+				}
 				&.toggler {
 					width: 20px;
 				}
@@ -349,6 +358,29 @@ $childItemFontSize: 12px;
 				}
 			}
 		}
+
+        /*
+        | ------------------
+        | GANTT GRAPH PANEL
+        | -------------------
+        | Contains the graph content
+        | This is a scrollable panel of all charts
+        */
+        .gantt-graph-panel{
+            background: #f4f4f4;
+            position: relative;
+            .gantt-row{
+                height: $cellHeight;
+            }
+        }
+	}
+
+	.gantt-graph,
+	.graph-row {
+		justify-content: flex-end;
+		.table-cell {
+			flex: none;
+		}
 	}
 }
 </style>
@@ -385,15 +417,15 @@ $childItemFontSize: 12px;
             <div class="gantt-header">
 
                 <!-- Gantt table section -->
-                <div class="gantt-table" :style="{ width: widths.table + 'px' }">
+                <div class="table-section" :style="{ width: widths.table + 'px' }">
                     <div class="table-cell" :class="{ sortable : !!field.sort }" :style="{ width: field.width + 'px' }" v-for="(field, slug) in localFields" :key="slug" @click="sortBy = slug">{{ field.label }}</div>
                 </div>
 
                 <!-- Gantt graph section -->
-                <div class="gantt-graph" :style="{ width: widths.graph + 'px' }">
-                    <div class="table-cell" :style="{ width: widths.cell + 'px' }" v-for="(date, key) in dates" :key="key">
-                        <span class="day">{{ date | moment('D') }}</span>
-                        <span class="month">{{ date | moment('MMM') }}</span>
+                <div class="graph-section" :style="{ width: widths.graph + 'px' }">
+                    <div class="table-cell" :class="{ 'hidden-date' : !date.shown }" :style="{ width: widths.cell + 'px' }" v-for="(date, key) in dates" :key="key">
+                        <span class="day">{{ date.date | moment('D') }}</span>
+                        <span class="month">{{ date.date | moment('MMM') }}</span>
                     </div>
                 </div>
 
@@ -403,7 +435,9 @@ $childItemFontSize: 12px;
             <div class="gantt-body">
 
                 <!-- Gantt table row -->
-                <div class="gantt-row" v-for="(item, key) in localSortedItems" :class="{ parent: item.isParent, child: item.isChild }" v-if="!item.isChild || (item.isChild && openItems.includes(item.parentId))">
+                <div class="gantt-row" v-for="(item, key) in localSortedItems" :class="{ parent: item.isParent, child: item.isChild }" v-if="!item.isChild || (item.isChild && openItems.includes(item.parentId))" :key="key">
+                    
+                    <!-- Table section: start -->
                     <div class="table-section" :key="item.id" :style="{ width: widths.table + 'px'}">
 
                         <template v-if="localFields.toggle">
@@ -423,12 +457,28 @@ $childItemFontSize: 12px;
                         </div>
 
                     </div>
+                     <!-- Table section: end -->
+
+                    <!-- Graph section:start -->
                     <div class="graph-section" :style="{ width: widths.graph + 'px' }">
                         <gantt-graph :item="item" :dates="dates" :cell_width="widths.cell" :user="user" :open="!item.isParent || openItems.includes(item.id)" @date-updated="dateUpdated" @open="openItems.push(item.id)"></gantt-graph>
                     </div>
+                    <!-- Graph section:end -->
+
                 </div>
 
             </div>
+
+            <!-- Gantt body: start -->
+            <div v-if="false" class="gantt-body" style="margin-top: 50px;">
+                <div class="gantt-table" :style="{ width: widths.table + 'px' }"></div>
+                <div class="gantt-graph-panel" :style="{ width: widths.graph + 'px' }">
+                    <div class="gantt-row" v-for="(item, key) in localSortedItems" :key="key">
+                        <div class="marker" :class="{ parent : item.isParent }" :style="{ width: (widths.cell * item.duration) + 'px', left: computedOffset(item) }"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Gantt body: end -->
 
         </div>
     </div>
@@ -598,6 +648,7 @@ export default {
 			indent: 20,
 			longest_cell: { width: 0, slug: '' },
 			dateFormat: 'YYYY-MM-DD HH:mm',
+			localFirstDate: '',
 			localItems: this.compileItems(this.items),
 			localFields: this.fields,
 			localStartDate: this.startDate,
@@ -617,6 +668,7 @@ export default {
 		let self = this
 
 		this.localFields = { toggle: { label: '', width: 20 }, ...this.fields }
+
 		// Calculate the table by
 		// sumizing the individual columns
 		let fields = []
@@ -661,11 +713,13 @@ export default {
 		compileItems(items) {
 			console.log('compile local items')
 			let result = []
+			let earliest_date = new Date()
 			// Loop over all the given items
 			items.forEach(item => {
 				// Check if the item has a key
 				// that indicitats if it has children
 				let has_level = item.hasOwnProperty(this.levelKey)
+				earliest_date = new Date(item.start_date) < new Date(earliest_date) ? item.start_date : earliest_date
 
 				// If we have children
 				// Mark the item as a parent item
@@ -685,6 +739,8 @@ export default {
 				}
 			})
 
+            window.localFirstDate = earliest_date
+            
 			return result
 		},
 
@@ -754,12 +810,11 @@ export default {
 			if (cell.ignoreCallback.start_date) {
 				cell.ignoreCallback.start_date = false
 				return
-            }
-            console.log('-- callback: start_date updated')
+			}
 
 			cell.end_date = this.$moment(cell.start_date, this.dateFormat)
 				.add(cell.duration, 'd')
-                .format(this.dateFormat)
+				.format(this.dateFormat)
 
 			if (cell.isChild && !cell.recursive) {
 				// Get the parent item of the child
@@ -767,28 +822,28 @@ export default {
 				// Get all the parents children
 				let children = this.localItems.filter(item => item.parentId === parseInt(cell.parentId))
 				let start_date = children[0].start_date
-                let end_date = children[0].end_date
-                
-                // Calculate first and last date
-                children.forEach(child => {
+				let end_date = children[0].end_date
+
+				// Calculate first and last date
+				children.forEach(child => {
 					start_date = new Date(child.start_date) < new Date(start_date) ? child.start_date : start_date
 					end_date = new Date(child.end_date) > new Date(end_date) ? child.end_date : end_date
-                })
-                let duration = this.$moment(end_date, this.dateFormat).diff(this.$moment(start_date, this.dateFormat), 'd')
+				})
+				let duration = this.$moment(end_date, this.dateFormat).diff(this.$moment(start_date, this.dateFormat), 'd')
 
-                // Ignore the default callback
-                // We want to set the properties bottom up 
-                // not top down
-                if (!parent_item.ignoreCallback) parent_item.ignoreCallback = {}
+				// Ignore the default callback
+				// We want to set the properties bottom up
+				// not top down
+				if (!parent_item.ignoreCallback) parent_item.ignoreCallback = {}
 				parent_item.ignoreCallback.start_date = true
 				parent_item.ignoreCallback.end_date = true
-                parent_item.ignoreCallback.duration = true
-                
-                // Set the properties
-                parent_item.start_date = start_date
-                parent_item.end_date = end_date
-                parent_item.duration = duration
-            }
+				parent_item.ignoreCallback.duration = true
+
+				// Set the properties
+				parent_item.start_date = start_date
+				parent_item.end_date = end_date
+				parent_item.duration = duration
+			}
 		},
 
 		/*
@@ -799,8 +854,7 @@ export default {
 			if (cell.ignoreCallback.end_date) {
 				cell.ignoreCallback.end_date = false
 				return
-            }
-            console.log('-- callback: end_date updated')
+			}
 
 			let date_diff = this.$moment(cell.end_date, this.dateFormat).diff(this.$moment(cell.start_date, this.dateFormat), 'd')
 			if (date_diff > 0) cell.duration = date_diff
@@ -816,37 +870,37 @@ export default {
 			if (cell.ignoreCallback.duration) {
 				cell.ignoreCallback.duration = false
 				return
-            }
-            console.log('-- callback: duration updated')
+			}
+			console.log('-- callback: duration updated')
 
 			let end_date = this.$moment(cell.start_date, this.dateFormat).add(cell.duration - 1, 'd')
 			cell.end_date = end_date.format(this.dateFormat)
-            
-			if (cell.isChild) { 
-                 console.log('child is updated')
+
+			if (cell.isChild) {
+				console.log('child is updated')
 				// Get the parent item of the child
 				let parent_item = this.localItems.find(item => item.id === parseInt(cell.parentId))
 				// Get all the parents children
 				let children = this.localItems.filter(item => item.parentId === parseInt(cell.parentId))
 				let start_date = cell.start_date
-                let end_date = cell.end_date
-                
-                // Calculate first and last date
-                children.forEach(child => {
+				let end_date = cell.end_date
+
+				// Calculate first and last date
+				children.forEach(child => {
 					start_date = new Date(child.start_date) < new Date(start_date) ? child.start_date : start_date
 					end_date = new Date(child.end_date) > new Date(end_date) ? child.end_date : end_date
-                })
-                let duration = this.$moment(end_date, this.dateFormat).diff(this.$moment(start_date, this.dateFormat), 'd') + 1
+				})
+				let duration = this.$moment(end_date, this.dateFormat).diff(this.$moment(start_date, this.dateFormat), 'd') + 1
 
-                if (!parent_item.ignoreCallback) parent_item.ignoreCallback = {}
-                parent_item.ignoreCallback.end_date = true
+				if (!parent_item.ignoreCallback) parent_item.ignoreCallback = {}
+				parent_item.ignoreCallback.end_date = true
 
-                // Set the properties
-                parent_item.duration = duration
-                parent_item.end_date = end_date
-            }
+				// Set the properties
+				parent_item.duration = duration
+				parent_item.end_date = end_date
+			}
 
-             cell.ignoreCallback.end_date = true
+			cell.ignoreCallback.end_date = true
 		},
 
 		/*
@@ -871,7 +925,7 @@ export default {
 				if (!window.markers || window.markers.length === 0) return false
 
 				window.markers.forEach(marker => {
-					let drop_date = this.dates[marker.lastCell - 1]
+					let drop_date = this.dates[marker.lastCell - 1].date
 					let row_id = marker.dataset.rowId
 					let item = this.localItems.find(item => item.id === parseInt(row_id))
 					item.recursive = marker.recursive
@@ -906,7 +960,15 @@ export default {
 					}
 				})
 			}
-		}
+        },
+        
+        computedOffset(item){
+
+            let offset = this.$moment(this.localStartDate, this.dateFormat).diff(this.$moment(item.start_date, this.dateFormat), 'd')
+            let width = (offset * this.widths.cell)
+
+            return width - (width * 2) + 'px'
+        }
 	},
 	computed: {
 		/*
@@ -915,12 +977,14 @@ export default {
         */
 		dates() {
 			let dates = []
+
 			for (let index = 0; index < this.localDateLimit; index++) {
-				dates.push(
-					this.$moment(this.localStartDate, this.dateFormat)
+				dates.push({
+					shown: true,
+					date: this.$moment(this.localStartDate, this.dateFormat)
 						.add(index, 'days')
 						.format(this.dateFormat)
-				)
+				})
 			}
 
 			return dates
@@ -954,7 +1018,7 @@ export default {
         | generated dates array.
         */
 		dates: function() {
-			this.localEndDate = this.dates[this.dates.length - 1]
+			this.localEndDate = this.dates[this.dates.length - 1].date
 		}
 	}
 }
