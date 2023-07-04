@@ -16,6 +16,8 @@
 </template>
 
 <script>
+import moment from 'moment'
+
 export default {
 	props: {
 		/**
@@ -83,7 +85,7 @@ export default {
         | Compare 2 given dates 
         */
 		compareDate(date, match_date) {
-			return this.$moment(date).format('Y-M-D') === this.$moment(match_date).format('Y-M-D')
+			return moment(date).format('Y-M-D') === moment(match_date).format('Y-M-D')
 		},
 
 		/*

@@ -1,16 +1,19 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
 import flatPickr from 'vue-flatpickr-component'
+import moment from 'moment'
 
 import './styles/app.scss'
 import 'flatpickr/dist/flatpickr.css'
 
-Vue.config.productionTip = false
+const app = createApp(App)
+app.config.productionTip = false
 
-Vue.use(require('vue-moment'))
+app.config.globalProperties.$filters = {
+  moment(date, format) {
+    return moment(date).format(format)
+  },
+}
 
-Vue.component('flatPickr', flatPickr)
-
-new Vue({
-	render: h => h(App)
-}).$mount('#app')
+app.component('flatPickr', flatPickr)
+app.mount("#app")
