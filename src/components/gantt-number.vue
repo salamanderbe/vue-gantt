@@ -11,7 +11,7 @@ export default {
 		 * Number value of the cell
 		 * @type {Number}
 		 */
-		value: {
+		modelValue: {
 			type: Number,
 			required: false
 		},
@@ -78,7 +78,7 @@ export default {
 	},
 	data() {
 		return {
-			localValue: this.value
+			localValue: this.modelValue
 		}
 	},
 	methods: {

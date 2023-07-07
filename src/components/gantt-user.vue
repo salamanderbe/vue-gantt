@@ -7,7 +7,7 @@
 
 <template>
     <div v-if="user" :style="{ width : width + 'px'}">
-        <img class="cell-image" :style="{ width: width / 2 + 'px', height: width / 2 + 'px' }" :src="value[user.image]">
+        <img class="cell-image" :style="{ width: width / 2 + 'px', height: width / 2 + 'px' }" :src="modelValue[user.image]">
     </div>
 </template>
 
@@ -18,7 +18,7 @@ export default {
 		 * Object value of the cell
 		 * @type {Object}
 		 */
-		value: {
+		modelValue: {
 			type: Object,
 			required: false,
 			default: () => {

@@ -440,15 +440,15 @@ $childItemFontSize: 12px;
 															<div v-else :style="{ width: localFields.toggle.width + 'px' }"></div>
 													</template>
 
-													<div class="table-group">
-														<div v-if="localFields.hasOwnProperty(field)">
-															<template v-for="(field, slug) in Object.keys(item)">
-																	<gantt-user v-if="localFields[field].component === 'gantt-user'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :user="user" :editable="!item.isParent"></gantt-user>
-																	<gantt-text v-if="localFields[field].component === 'gantt-text'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" @update="cellUpdated(localFields[field].callback, item)"></gantt-text>
-																	<gantt-date v-if="localFields[field].component === 'gantt-date'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :minDate="item[localFields[field].minDate]" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-date>
-																	<gantt-number v-if="localFields[field].component === 'gantt-number'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :min="localFields[field].min" :max="localFields[field].max" :suffix="localFields[field].suffix" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-number>
+													<div class="table-group" >
+															<template v-for="(field, slug) in Object.keys(item)" >
+																	<div v-if="localFields.hasOwnProperty(field)" v-bind:key="field">
+																			<gantt-user v-if="localFields[field].component === 'gantt-user'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :user="user" :editable="!item.isParent"></gantt-user>
+																			<gantt-text v-if="localFields[field].component === 'gantt-text'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" @update="cellUpdated(localFields[field].callback, item)"></gantt-text>
+																			<gantt-date v-if="localFields[field].component === 'gantt-date'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :minDate="item[localFields[field].minDate]" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-date>
+																			<gantt-number v-if="localFields[field].component === 'gantt-number'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :min="localFields[field].min" :max="localFields[field].max" :suffix="localFields[field].suffix" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-number>
+																	</div>
 															</template>
-														</div>
 													</div>
 
 											</div>
@@ -735,8 +735,8 @@ export default {
 				}
 			})
 
-            window.localFirstDate = earliest_date
-            
+			window.localFirstDate = earliest_date
+
 			return result
 		},
 
