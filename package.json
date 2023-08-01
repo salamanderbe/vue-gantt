@@ -12,9 +12,12 @@
     "moment": "^2.29.4",
     "sass": "^1.63.6",
     "sass-loader": "^13.3.2",
+    "vue": "^3.3.4",
     "vue-flatpickr-component": "^11.0.3",
     "vue-loader": "^17.2.2"
   },
+  "main": "dist/vue-gantt.umd.js",
+  "module": "dist/vue-gantt.mjs",
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",

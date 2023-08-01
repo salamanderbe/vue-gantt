@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: 'vue-gantt',
     },
     rollupOptions: {
-      external: ['vue'],
+      external: ['vue', 'vue-moment'],
       output: {
         globals: {
           vue: 'Vue',
@@ -21,9 +21,5 @@ export default defineConfig({
   optimizeDeps: {
     include: ["vue-gantt"],
   },
-  build: {
-    rollupOptions: {
-      external: ['vue-moment'],
-    },
-  },
 });
+
