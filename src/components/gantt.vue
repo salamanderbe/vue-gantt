@@ -481,12 +481,12 @@ $childItemFontSize: 12px;
 </template>
 
 <script>
-import GanttText from './gantt-text'
-import GanttDate from './gantt-date'
-import GanttNumber from './gantt-number'
-import GanttUser from './gantt-user'
-import GanttMessage from './gantt-message'
-import GanttGraph from './gantt-graph'
+import GanttText from './gantt-text.vue'
+import GanttDate from './gantt-date.vue'
+import GanttNumber from './gantt-number.vue'
+import GanttUser from './gantt-user.vue'
+import GanttMessage from './gantt-message.vue'
+import GanttGraph from './gantt-graph.vue'
 import moment from 'moment'
 
 export default {
