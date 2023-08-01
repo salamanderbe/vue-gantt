@@ -21,4 +21,9 @@ export default defineConfig({
   optimizeDeps: {
     include: ["vue-gantt"],
   },
-})
+  build: {
+    rollupOptions: {
+      external: ['vue-moment'],
+    },
+  },
+});
