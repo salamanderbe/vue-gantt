@@ -1,67 +1,52 @@
 {
-	"name": "@salamander.be/vue-gantt",
-	"description": "A VueJs Gantt chart.",
-	"author": "Frederiek <frederiek@salamander.be>",
-	"license": "Apache",
-	"version": "0.0.2",
-	"main": "./dist/vue-gantt.common.js",
-	"keywords": [
-		"vue",
-		"Gantt"
-	],
-	"scripts": {
-		"serve": "vue-cli-service serve",
-		"build": "vue-cli-service build",
-		"docs": "vue-cli-service build --dest docs",
-		"build-bundle": "vue-cli-service build --target lib --name vue-gantt ./src/components/index.js",
-		"lint": "vue-cli-service lint"
-	},
-	"dependencies": {
-		"vue": "^2.5.17"
-	},
-	"devDependencies": {
-		"@vue/cli-plugin-babel": "^3.0.4",
-		"@vue/cli-plugin-eslint": "^3.0.4",
-		"@vue/cli-service": "^3.0.4",
-		"node-sass": "^4.9.0",
-		"sass-loader": "^7.0.1",
-		"vue-flatpickr-component": "^8.0.0",
-		"vue-moment": "^4.0.0",
-		"vue-template-compiler": "^2.5.17"
-	},
-	"eslintConfig": {
-		"root": true,
-		"env": {
-			"node": true
-		},
-		"extends": [
-			"plugin:vue/essential",
-			"eslint:recommended"
-		],
-		"rules": {},
-		"parserOptions": {
-			"parser": "babel-eslint"
-		}
-	},
-	"postcss": {
-		"plugins": {
-			"autoprefixer": {}
-		}
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/salamanderbe/vue-gantt"
-	},
-	"files": [
-		"dist/*",
-		"src/*",
-		"public/*",
-		"*.json",
-		"*.js"
-	],
-	"browserslist": [
-		"> 1%",
-		"last 2 versions",
-		"not ie <= 8"
-	]
+  "name": "vue-gantt",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vite build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "core-js": "^3.8.3",
+    "moment": "^2.29.4",
+    "sass": "^1.63.6",
+    "sass-loader": "^13.3.2",
+    "vue": "^3.3.4",
+    "vue-flatpickr-component": "^11.0.3",
+    "vue-loader": "^17.2.2"
+  },
+  "main": "dist/vue-gantt.umd.js",
+  "module": "dist/vue-gantt.mjs",
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "vite": "^4.4.8"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ]
 }

@@ -1,6 +1,6 @@
 <template>
     <div :style="{ width : width + 'px'}" :class="{ flash : flash, disabled: !editable }">
-        <flat-pickr @on-change="onUpdate" :placeholder="placeholder" :value="value" :config="config"></flat-pickr>
+        <flat-pickr @on-change="onUpdate" :placeholder="placeholder" :value="modelValue" :config="config"></flat-pickr>
     </div>
 </template>
 
@@ -11,7 +11,7 @@ export default {
 		 * String value of the cell
 		 * @type {String}
 		 */
-		value: {
+		modelValue: {
 			type: String,
 			required: false
 		},

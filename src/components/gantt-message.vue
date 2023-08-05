@@ -69,9 +69,13 @@ export default {
 	computed: {
 		title() {
 			if (this.type === 'missing_required_fields') return 'Missing required fields'
+
+			return "";
 		},
 		description() {
 			if (this.type === 'missing_required_fields') return 'The start_date, end_date and duration field are required and should bre provided als props of the gantt component'
+
+			return "";
 		}
 	}
 }

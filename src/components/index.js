@@ -1,14 +1,14 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import Gantt from './gantt.vue'
 import flatPickr from 'vue-flatpickr-component'
-
-// Usesages
-Vue.use(require('vue-moment'))
 
 // Styles
 import 'flatpickr/dist/flatpickr.css'
 
-Vue.component('flatPickr', flatPickr)
-Vue.component('Gantt', Gantt)
+const app = createApp({})
+
+app.component('flatPickr', flatPickr)
+// eslint-disable-next-line vue/multi-word-component-names
+app.component('Gantt', Gantt)
 
 export default Gantt

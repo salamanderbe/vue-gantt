@@ -113,14 +113,6 @@ $childItemFontSize: 12px;
 			background: #fff;
 			z-index: 0;
 
-			.table-cell {
-				&.sortable {
-					cursor: pointer;
-					&:hover {
-						font-weight: 600;
-					}
-				}
-			}
 		}
 
 		// Gantt chart section
@@ -424,8 +416,8 @@ $childItemFontSize: 12px;
                 <!-- Gantt graph section -->
                 <div class="graph-section" :style="{ width: widths.graph + 'px' }">
                     <div class="table-cell" :class="{ 'hidden-date' : !date.shown }" :style="{ width: widths.cell + 'px' }" v-for="(date, key) in dates" :key="key">
-                        <span class="day">{{ date.date | moment('D') }}</span>
-                        <span class="month">{{ date.date | moment('MMM') }}</span>
+												<span class="day">{{ $filters.moment(date.date, 'D')  }}</span>
+                        <span class="month">{{ $filters.moment(date.date, 'MMM') }}</span>
                     </div>
                 </div>
 
@@ -434,37 +426,41 @@ $childItemFontSize: 12px;
             <!-- Gant body -->
             <div class="gantt-body">
 
-                <!-- Gantt table row -->
-                <div class="gantt-row" v-for="(item, key) in localSortedItems" :class="{ parent: item.isParent, child: item.isChild }" v-if="!item.isChild || (item.isChild && openItems.includes(item.parentId))" :key="key">
-                    
-                    <!-- Table section: start -->
-                    <div class="table-section" :key="item.id" :style="{ width: widths.table + 'px'}">
+								<div v-for="(item, key) in localSortedItems" :key="item.id">
+									<!-- Gantt table row -->
+									<div class="gantt-row" :class="{ parent: item.isParent, child: item.isChild }" v-if="!item.isChild || (item.isChild && openItems.includes(item.parentId))" :key="key">
+											
+											<!-- Table section: start -->
+											<div class="table-section" :key="item.id" :style="{ width: widths.table + 'px'}">
 
-                        <template v-if="localFields.toggle">
-                            <div v-if="item.isParent" class="toggle" :style="{ width: localFields.toggle.width + 'px' }" @click="openItems.includes(item.id) ? openItems.splice(openItems.indexOf(item.id), 1) : openItems.push(item.id)">
-                                <span :class=" { open: openItems.includes(item.id), close: !openItems.includes(item.id) }"></span>
-                            </div>
-                            <div v-else :style="{ width: localFields.toggle.width + 'px' }"></div>
-                        </template>
+													<template v-if="localFields.toggle">
+															<div v-if="item.isParent" class="toggle" :style="{ width: localFields.toggle.width + 'px' }" @click="openItems.includes(item.id) ? openItems.splice(openItems.indexOf(item.id), 1) : openItems.push(item.id)">
+																	<span :class=" { open: openItems.includes(item.id), close: !openItems.includes(item.id) }"></span>
+															</div>
+															<div v-else :style="{ width: localFields.toggle.width + 'px' }"></div>
+													</template>
 
-                        <div class="table-group">
-                            <template v-if="localFields.hasOwnProperty(field)" v-for="(field, slug) in Object.keys(item)">
-                                <gantt-user v-if="localFields[field].component === 'gantt-user'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :user="user" :editable="!item.isParent"></gantt-user>
-                                <gantt-text v-if="localFields[field].component === 'gantt-text'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" @update="cellUpdated(localFields[field].callback, item)"></gantt-text>
-                                <gantt-date v-if="localFields[field].component === 'gantt-date'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :minDate="item[localFields[field].minDate]" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-date>
-                                <gantt-number v-if="localFields[field].component === 'gantt-number'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :min="localFields[field].min" :max="localFields[field].max" :suffix="localFields[field].suffix" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-number>
-                            </template>
-                        </div>
+													<div class="table-group" >
+															<template v-for="(field, slug) in Object.keys(item)" >
+																	<div v-if="localFields.hasOwnProperty(field)" v-bind:key="field">
+																			<gantt-user v-if="localFields[field].component === 'gantt-user'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :user="user" :editable="!item.isParent"></gantt-user>
+																			<gantt-text v-if="localFields[field].component === 'gantt-text'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" @update="cellUpdated(localFields[field].callback, item)"></gantt-text>
+																			<gantt-date v-if="localFields[field].component === 'gantt-date'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :minDate="item[localFields[field].minDate]" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-date>
+																			<gantt-number v-if="localFields[field].component === 'gantt-number'" class="table-cell" v-model="item[field]" :style="{ 'padding-left': (field === longest_cell.slug && item.isChild) ? indent + 'px' : ''  }" :key="slug" :width="localFields[field].width" :min="localFields[field].min" :max="localFields[field].max" :suffix="localFields[field].suffix" @update="cellUpdated(localFields[field].callback, item)" :editable="!item.isParent"></gantt-number>
+																	</div>
+															</template>
+													</div>
 
-                    </div>
-                     <!-- Table section: end -->
+											</div>
+											<!-- Table section: end -->
 
-                    <!-- Graph section:start -->
-                    <div class="graph-section" :style="{ width: widths.graph + 'px' }">
-                        <gantt-graph :item="item" :dates="dates" :cell_width="widths.cell" :user="user" :open="!item.isParent || openItems.includes(item.id)" @date-updated="dateUpdated" @open="openItems.push(item.id)"></gantt-graph>
-                    </div>
-                    <!-- Graph section:end -->
+											<!-- Graph section:start -->
+											<div class="graph-section" :style="{ width: widths.graph + 'px' }">
+													<gantt-graph :item="item" :dates="dates" :cell_width="widths.cell" :user="user" :open="!item.isParent || openItems.includes(item.id)" @date-updated="dateUpdated" @open="openItems.push(item.id)"></gantt-graph>
+											</div>
+											<!-- Graph section:end -->
 
+									</div>
                 </div>
 
             </div>
@@ -485,17 +481,16 @@ $childItemFontSize: 12px;
 </template>
 
 <script>
-import Vue from 'vue'
-
-import GanttText from './gantt-text'
-import GanttDate from './gantt-date'
-import GanttNumber from './gantt-number'
-import GanttUser from './gantt-user'
-import GanttMessage from './gantt-message'
-import GanttGraph from './gantt-graph'
+import GanttText from './gantt-text.vue'
+import GanttDate from './gantt-date.vue'
+import GanttNumber from './gantt-number.vue'
+import GanttUser from './gantt-user.vue'
+import GanttMessage from './gantt-message.vue'
+import GanttGraph from './gantt-graph.vue'
+import moment from 'moment'
 
 export default {
-	name: 'Gantt',
+	name: 'GanttComponent',
 	components: { GanttText, GanttDate, GanttNumber, GanttUser, GanttMessage, GanttGraph },
 	props: {
 		/**
@@ -591,7 +586,7 @@ export default {
 		startDate: {
 			type: String,
 			default: () => {
-				return Vue.moment()
+				return moment()
 					.subtract(2, 'd')
 					.format('YYYY-MM-DD HH:mm:ss')
 			}
@@ -605,7 +600,7 @@ export default {
 		endDate: {
 			type: String,
 			default: () => {
-				return Vue.moment()
+				return moment()
 					.add(5, 'd')
 					.format('YYYY-MM-DD HH:mm:ss')
 			}
@@ -718,6 +713,7 @@ export default {
 			items.forEach(item => {
 				// Check if the item has a key
 				// that indicitats if it has children
+				// eslint-disable-next-line
 				let has_level = item.hasOwnProperty(this.levelKey)
 				earliest_date = new Date(item.start_date) < new Date(earliest_date) ? item.start_date : earliest_date
 
@@ -739,8 +735,8 @@ export default {
 				}
 			})
 
-            window.localFirstDate = earliest_date
-            
+			window.localFirstDate = earliest_date
+
 			return result
 		},
 
@@ -767,7 +763,7 @@ export default {
         | Set the start date 1 day earlier
         */
 		prev() {
-			this.localStartDate = this.$moment(this.localStartDate)
+			this.localStartDate = moment(this.localStartDate)
 				.subtract(1, 'd')
 				.format(this.dateFormat)
 		},
@@ -776,11 +772,10 @@ export default {
         | Set the start date 1 day in the future
         */
 		next() {
-			this.localStartDate = this.$moment(this.localStartDate)
+			this.localStartDate = moment(this.localStartDate)
 				.add(1, 'd')
 				.format(this.dateFormat)
 		},
-
 		/*
         | Handle function when not all
         | required fields are provided
@@ -812,7 +807,7 @@ export default {
 				return
 			}
 
-			cell.end_date = this.$moment(cell.start_date, this.dateFormat)
+			cell.end_date = moment(cell.start_date, this.dateFormat)
 				.add(cell.duration, 'd')
 				.format(this.dateFormat)
 
@@ -829,7 +824,7 @@ export default {
 					start_date = new Date(child.start_date) < new Date(start_date) ? child.start_date : start_date
 					end_date = new Date(child.end_date) > new Date(end_date) ? child.end_date : end_date
 				})
-				let duration = this.$moment(end_date, this.dateFormat).diff(this.$moment(start_date, this.dateFormat), 'd')
+				let duration = moment(end_date, this.dateFormat).diff(moment(start_date, this.dateFormat), 'd')
 
 				// Ignore the default callback
 				// We want to set the properties bottom up
@@ -856,7 +851,7 @@ export default {
 				return
 			}
 
-			let date_diff = this.$moment(cell.end_date, this.dateFormat).diff(this.$moment(cell.start_date, this.dateFormat), 'd')
+			let date_diff = moment(cell.end_date, this.dateFormat).diff(moment(cell.start_date, this.dateFormat), 'd')
 			if (date_diff > 0) cell.duration = date_diff
 
 			cell.ignoreCallback.duration = true
@@ -873,7 +868,7 @@ export default {
 			}
 			console.log('-- callback: duration updated')
 
-			let end_date = this.$moment(cell.start_date, this.dateFormat).add(cell.duration - 1, 'd')
+			let end_date = moment(cell.start_date, this.dateFormat).add(cell.duration - 1, 'd')
 			cell.end_date = end_date.format(this.dateFormat)
 
 			if (cell.isChild) {
@@ -890,7 +885,7 @@ export default {
 					start_date = new Date(child.start_date) < new Date(start_date) ? child.start_date : start_date
 					end_date = new Date(child.end_date) > new Date(end_date) ? child.end_date : end_date
 				})
-				let duration = this.$moment(end_date, this.dateFormat).diff(this.$moment(start_date, this.dateFormat), 'd') + 1
+				let duration = moment(end_date, this.dateFormat).diff(moment(start_date, this.dateFormat), 'd') + 1
 
 				if (!parent_item.ignoreCallback) parent_item.ignoreCallback = {}
 				parent_item.ignoreCallback.end_date = true
@@ -964,7 +959,7 @@ export default {
         
         computedOffset(item){
 
-            let offset = this.$moment(this.localStartDate, this.dateFormat).diff(this.$moment(item.start_date, this.dateFormat), 'd')
+            let offset = moment(this.localStartDate, this.dateFormat).diff(moment(item.start_date, this.dateFormat), 'd')
             let width = (offset * this.widths.cell)
 
             return width - (width * 2) + 'px'
@@ -981,7 +976,7 @@ export default {
 			for (let index = 0; index < this.localDateLimit; index++) {
 				dates.push({
 					shown: true,
-					date: this.$moment(this.localStartDate, this.dateFormat)
+					date: moment(this.localStartDate, this.dateFormat)
 						.add(index, 'days')
 						.format(this.dateFormat)
 				})
@@ -1007,6 +1002,7 @@ export default {
 				}
 			}
 
+			// eslint-disable-next-line
 			this.sortBy = false
 
 			return items

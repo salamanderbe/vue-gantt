@@ -1,6 +1,6 @@
 <template>
     <div :style="{ width : width + 'px'}">
-        <input ref="input" class="cell" type="text" :value="value" :placeholder="placeholder" @input="onUpdate($event.target.value)">
+        <input ref="input" class="cell" type="text" :value="modelValue" :placeholder="placeholder" @update:modelValue="$event">
     </div>
 </template>
 
@@ -11,7 +11,7 @@ export default {
 		 * String value of the cell
 		 * @type {String}
 		 */
-		value: {
+		modelValue: {
 			type: String,
 			required: false
 		},
@@ -44,12 +44,6 @@ export default {
 		placeholder: {
 			type: String,
 			default: 'Add a new task...'
-		}
-	},
-	methods: {
-		onUpdate(value) {
-			this.$emit('input', value)
-			this.$emit('update')
 		}
 	}
 }
